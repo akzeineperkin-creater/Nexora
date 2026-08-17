@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+    /* Light Theme Palette */
+    --nexora-lime: #B8F500;
+    --nexora-lime-rgb: 184, 245, 0;
+    --nexora-lime-soft: #F4FDE8;
+    --nexora-lime-hover: #A6DE00;
+    --nexora-background: #F8FAFC;
+    --nexora-surface: #FFFFFF;
+    --nexora-surface-glass: rgba(255, 255, 255, 0.85);
+    --nexora-text: #0F172A;
+    --nexora-muted: #64748B;
+    --nexora-border: #E2E8F0;
+    --nexora-border-subtle: #F1F5F9;
+    --nexora-success: #10B981;
+    --nexora-danger: #EF4444;
+  }
+
+  .dark {
+    /* Exact Nexra Dark Theme Palette: #0F0B0A bg, #28282B surface, #3A3A3D border, #B8F500 lime */
+    --nexora-lime: #B8F500;
+    --nexora-lime-rgb: 184, 245, 0;
+    --nexora-lime-soft: rgba(184, 245, 0, 0.12);
+    --nexora-lime-hover: #A6DE00;
+    --nexora-background: #0F0B0A;
+    --nexora-surface: #28282B;
+    --nexora-surface-hover: #323236;
+    --nexora-surface-glass: rgba(40, 40, 43, 0.90);
+    --nexora-text: #F5F5F5;
+    --nexora-text-secondary: #A1A1AA;
+    --nexora-muted: #71717A;
+    --nexora-border: #3A3A3D;
+    --nexora-border-subtle: #28282B;
+    --nexora-success: #10B981;
+    --nexora-danger: #EF4444;
+  }
+
+  body {
+    background-color: var(--nexora-background);
+    color: var(--nexora-text);
+    font-family: var(--font-body);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    color: var(--nexora-text);
+    letter-spacing: -0.025em;
+  }
+}
+
+/* Glassmorphism Utilities */
+.glass-card {
+  background: var(--nexora-surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--nexora-border);
+}
+
+.glass-button {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--nexora-border);
+}
+
+.dark .glass-button {
+  background: #28282B;
+  border-color: #3A3A3D;
+}
+
+/* Marquee Scroller */
+@keyframes marquee {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #3A3A3D;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #4A4A4E;
+}
