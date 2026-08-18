@@ -424,7 +424,7 @@ export default function GameDetailPage() {
             <div>
               <h4 className="font-extrabold text-sm flex items-center gap-1.5">
                 <span>Trading starts at {formatEasternDateTime(game.startDate)}</span>
-                <span className="text-[10px] font-bold bg-amber-500/20 px-2 py-0.5 rounded-full">🔒 Trading locked</span>
+                <span className="text-[10px] font-bold bg-amber-500/20 px-2 py-0.5 rounded-full"> Trading locked</span>
               </h4>
               <p className="text-xs opacity-80 mt-0.5">
                 {hasJoined
@@ -448,7 +448,7 @@ export default function GameDetailPage() {
             <div>
               <h4 className="font-extrabold text-sm flex items-center gap-1.5">
                 <span>Tournament Concluded — Final Rankings Frozen</span>
-                <span className="text-[10px] font-bold bg-purple-500/20 px-2 py-0.5 rounded-full">🏆 XP Distributed</span>
+                <span className="text-[10px] font-bold bg-purple-500/20 px-2 py-0.5 rounded-full"> XP Distributed</span>
               </h4>
               <p className="text-xs opacity-80 mt-0.5">
                 Competition ended on {formatEasternDateTime(game.endDate)}. Final rankings are frozen and XP rewards have been awarded to all participants.
@@ -583,23 +583,23 @@ export default function GameDetailPage() {
             </div>
             <div className="flex flex-col gap-1.5 text-xs font-mono">
               <div className="flex items-center justify-between p-1.5 rounded-lg bg-amber-500/10 text-amber-800 dark:text-amber-300 font-bold">
-                <span>🥇 1st Place</span>
+                <span> 1st Place</span>
                 <span>+500 XP</span>
               </div>
               <div className="flex items-center justify-between p-1.5 rounded-lg bg-slate-400/10 text-slate-700 dark:text-slate-300 font-bold">
-                <span>🥈 2nd Place</span>
+                <span> 2nd Place</span>
                 <span>+350 XP</span>
               </div>
               <div className="flex items-center justify-between p-1.5 rounded-lg bg-amber-700/10 text-amber-800 dark:text-amber-400 font-bold">
-                <span>🥉 3rd Place</span>
+                <span> 3rd Place</span>
                 <span>+250 XP</span>
               </div>
               <div className="flex items-center justify-between p-1.5 rounded-lg bg-lime-500/10 text-lime-800 dark:text-lime font-bold">
-                <span>⭐ Top 10</span>
+                <span> Top 10</span>
                 <span>+100 XP</span>
               </div>
               <div className="flex items-center justify-between p-1.5 rounded-lg bg-slate-100 dark:bg-[#1E1E21] text-slate-600 dark:text-slate-400 font-bold">
-                <span>🎖️ Finisher</span>
+                <span> Finisher</span>
                 <span>+25 XP</span>
               </div>
             </div>
