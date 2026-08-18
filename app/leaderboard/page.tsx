@@ -135,14 +135,14 @@ export default function LeaderboardPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="bg-slate-50 dark:bg-[#1E1E21] border-b border-slate-border dark:border-[#3A3A3D] text-slate-muted dark:text-[#A1A1AA] uppercase text-[11px] font-bold tracking-wider select-none">
-                  <th className="py-3 px-4 w-16">Rank</th>
-                  <th className="py-3 px-4">Trader Nickname</th>
-                  <th className="py-3 px-4">Portfolio Value</th>
-                  <th className="py-3 px-4">Total Return</th>
-                  <th className="py-3 px-4">Simulated P&L</th>
-                  <th className="py-3 px-4">Trades</th>
-                  <th className="py-3 px-4 text-right">Win Rate</th>
+                <tr className="bg-slate-50 dark:bg-[#1E1E21] border-b border-slate-border dark:border-[#3A3A3D] text-slate-muted dark:text-[#A1A1AA] uppercase text-[10px] sm:text-[11px] font-bold tracking-wider select-none">
+                  <th className="py-3 px-2.5 sm:px-4 w-12 sm:w-16">Rank</th>
+                  <th className="py-3 px-2.5 sm:px-4">Trader Nickname</th>
+                  <th className="py-3 px-2.5 sm:px-4">Portfolio Value</th>
+                  <th className="py-3 px-2.5 sm:px-4">Total Return</th>
+                  <th className="py-3 px-2.5 sm:px-4 hidden md:table-cell">Simulated P&L</th>
+                  <th className="py-3 px-2.5 sm:px-4 hidden sm:table-cell">Trades</th>
+                  <th className="py-3 px-2.5 sm:px-4 text-right hidden sm:table-cell">Win Rate</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-[#3A3A3D]">
@@ -155,21 +155,33 @@ export default function LeaderboardPage() {
                         isYou ? 'bg-lime-50/80 dark:bg-[#353539] border-l-4 border-lime font-bold' : ''
                       }`}
                     >
-                      <td className="py-3.5 px-4 font-mono font-extrabold text-sm text-slate-dark dark:text-[#F5F5F5]">#{u.rank}</td>
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-2.5">
+                      <td className="py-3.5 px-2.5 sm:px-4 font-mono font-extrabold text-xs sm:text-sm text-slate-dark dark:text-[#F5F5F5]">#{u.rank}</td>
+                      <td className="py-3.5 px-2.5 sm:px-4">
+                        <div className="flex items-center gap-2 sm:gap-2.5">
                           <div className="w-7 h-7 rounded-full bg-slate-100 dark:bg-[#1E1E21] border border-slate-200 dark:border-[#3A3A3D] flex items-center justify-center text-slate-600 dark:text-[#A1A1AA] shrink-0">
                             <User className="w-3.5 h-3.5" />
                           </div>
-                          <span className="font-bold text-slate-dark dark:text-[#F5F5F5]">{u.name}</span>
+                          <span className="font-extrabold text-xs sm:text-sm text-slate-dark dark:text-[#F5F5F5]">{u.name}</span>
                           {isYou && <Badge variant="lime" size="sm">You</Badge>}
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 font-mono font-bold text-slate-dark dark:text-[#F5F5F5]">{formatCurrency(u.portfolioValue)}</td>
-                      <td className="py-3.5 px-4 font-mono font-bold text-emerald-600 dark:text-emerald-400">{u.returnPct >= 0 ? '+' : ''}{u.returnPct}%</td>
-                      <td className="py-3.5 px-4 font-mono text-emerald-600 dark:text-emerald-400">{u.pnl >= 0 ? '+' : ''}{formatCurrency(u.pnl)}</td>
-                      <td className="py-3.5 px-4 font-mono text-slate-600 dark:text-[#A1A1AA]">{u.trades}</td>
-                      <td className="py-3.5 px-4 text-right font-mono font-bold text-slate-dark dark:text-[#F5F5F5]">{u.winRate}</td>
+                      <td className="py-3.5 px-2.5 sm:px-4 font-mono font-bold text-xs sm:text-sm text-slate-dark dark:text-[#F5F5F5]">
+                        {formatCurrency(u.portfolioValue)}
+                      </td>
+                      <td className="py-3.5 px-2.5 sm:px-4">
+                        <Badge variant={u.returnPct >= 0 ? 'up' : 'down'} size="sm">
+                          {u.returnPct >= 0 ? '+' : ''}{u.returnPct}%
+                        </Badge>
+                      </td>
+                      <td className="py-3.5 px-2.5 sm:px-4 font-mono text-slate-600 dark:text-[#A1A1AA] hidden md:table-cell">
+                        {u.pnl >= 0 ? '+' : ''}{formatCurrency(u.pnl)}
+                      </td>
+                      <td className="py-3.5 px-2.5 sm:px-4 font-mono text-slate-600 dark:text-[#A1A1AA] hidden sm:table-cell">
+                        {u.trades}
+                      </td>
+                      <td className="py-3.5 px-2.5 sm:px-4 text-right font-mono font-bold text-slate-700 dark:text-[#F5F5F5] hidden sm:table-cell">
+                        {u.winRate}
+                      </td>
                     </tr>
                   );
                 })}

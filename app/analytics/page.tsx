@@ -235,7 +235,7 @@ export default function AnalyticsPage() {
         <>
           {/* 4. HOLDINGS ANALYSIS TABLE ("Your Holdings") */}
           <Card className="p-0 overflow-hidden shadow-sm dark:shadow-dark-card">
-            <CardHeader className="p-5 pb-3">
+            <CardHeader className="p-4 sm:p-5 pb-3">
               <div>
                 <CardTitle>Your Holdings</CardTitle>
                 <CardSubtitle>Detailed breakdown of your current simulated equity positions</CardSubtitle>
@@ -246,14 +246,14 @@ export default function AnalyticsPage() {
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-[#1E1E21] border-b border-slate-border dark:border-[#3A3A3D] text-slate-muted dark:text-[#A1A1AA] uppercase text-[10px] font-bold tracking-wider select-none">
-                    <th className="py-3 px-4">Instrument</th>
-                    <th className="py-3 px-4 text-right">Shares</th>
-                    <th className="py-3 px-4 text-right">Avg Cost</th>
-                    <th className="py-3 px-4 text-right">Current Price</th>
-                    <th className="py-3 px-4 text-right">Market Value</th>
-                    <th className="py-3 px-4 text-right">Unrealized P&L</th>
-                    <th className="py-3 px-4 text-right">Portfolio %</th>
-                    <th className="py-3 px-4 text-center">Action</th>
+                    <th className="py-3 px-2.5 sm:px-4">Instrument</th>
+                    <th className="py-3 px-2.5 sm:px-4 text-right">Shares</th>
+                    <th className="py-3 px-2.5 sm:px-4 text-right hidden md:table-cell">Avg Cost</th>
+                    <th className="py-3 px-2.5 sm:px-4 text-right">Current Price</th>
+                    <th className="py-3 px-2.5 sm:px-4 text-right hidden sm:table-cell">Market Value</th>
+                    <th className="py-3 px-2.5 sm:px-4 text-right">Unrealized P&L</th>
+                    <th className="py-3 px-2.5 sm:px-4 text-right hidden sm:table-cell">Portfolio %</th>
+                    <th className="py-3 px-2.5 sm:px-4 text-center">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-[#3A3A3D]">
@@ -265,36 +265,36 @@ export default function AnalyticsPage() {
 
                     return (
                       <tr key={h.id} className="hover:bg-slate-50/80 dark:hover:bg-[#323236] transition-colors">
-                        <td className="py-3.5 px-4">
-                          <Link href={`/markets/${ticker}`} className="flex items-center gap-3">
-                            <CompanyLogo ticker={ticker} name={name} size="md" />
-                            <div>
-                              <div className="font-extrabold text-slate-dark dark:text-[#F5F5F5] text-sm group-hover:text-lime-900 dark:group-hover:text-lime transition-colors">{ticker}</div>
-                              <div className="text-[11px] text-slate-muted dark:text-[#71717A] truncate max-w-[180px]">{name}</div>
+                        <td className="py-3.5 px-2.5 sm:px-4">
+                          <Link href={`/markets/${ticker}`} className="flex items-center gap-2 sm:gap-3">
+                            <CompanyLogo ticker={ticker} name={name} size="sm" />
+                            <div className="min-w-0">
+                              <div className="font-extrabold text-slate-dark dark:text-[#F5F5F5] text-xs sm:text-sm group-hover:text-lime-900 dark:group-hover:text-lime transition-colors">{ticker}</div>
+                              <div className="text-[10px] sm:text-[11px] text-slate-muted dark:text-[#71717A] truncate max-w-[100px] sm:max-w-[180px]">{name}</div>
                             </div>
                           </Link>
                         </td>
-                        <td className="py-3.5 px-4 text-right font-mono font-bold text-slate-dark dark:text-[#F5F5F5] text-sm">
+                        <td className="py-3.5 px-2.5 sm:px-4 text-right font-mono font-bold text-slate-dark dark:text-[#F5F5F5] text-xs sm:text-sm">
                           {h.shares}
                         </td>
-                        <td className="py-3.5 px-4 text-right font-mono text-slate-600 dark:text-[#A1A1AA]">
+                        <td className="py-3.5 px-2.5 sm:px-4 text-right font-mono text-slate-600 dark:text-[#A1A1AA] hidden md:table-cell">
                           {formatCurrency(h.average_buy_price)}
                         </td>
-                        <td className="py-3.5 px-4 text-right font-mono font-bold text-slate-dark dark:text-[#F5F5F5]">
+                        <td className="py-3.5 px-2.5 sm:px-4 text-right font-mono font-bold text-slate-dark dark:text-[#F5F5F5] text-xs sm:text-sm">
                           {formatCurrency(h.currentPrice)}
                         </td>
-                        <td className="py-3.5 px-4 text-right font-mono font-bold text-slate-dark dark:text-[#F5F5F5] text-sm">
+                        <td className="py-3.5 px-2.5 sm:px-4 text-right font-mono font-bold text-slate-dark dark:text-[#F5F5F5] text-xs sm:text-sm hidden sm:table-cell">
                           {formatCurrency(h.marketValue)}
                         </td>
-                        <td className="py-3.5 px-4 text-right">
+                        <td className="py-3.5 px-2.5 sm:px-4 text-right">
                           <Badge variant={isPos ? 'up' : 'down'} size="sm">
-                            {isPos ? '+' : ''}{formatCurrency(h.unrealizedPnl)} ({formatPercent(h.unrealizedPnlPct)})
+                            {isPos ? '+' : ''}{formatCurrency(h.unrealizedPnl)} <span className="hidden sm:inline">({formatPercent(h.unrealizedPnlPct)})</span>
                           </Badge>
                         </td>
-                        <td className="py-3.5 px-4 text-right font-mono font-bold text-slate-700 dark:text-[#A1A1AA]">
+                        <td className="py-3.5 px-2.5 sm:px-4 text-right font-mono font-bold text-slate-700 dark:text-[#A1A1AA] hidden sm:table-cell">
                           {weight.toFixed(1)}%
                         </td>
-                        <td className="py-3.5 px-4 text-center">
+                        <td className="py-3.5 px-2.5 sm:px-4 text-center">
                           <Link href={`/trade?symbol=${ticker}&type=SELL`}>
                             <Button variant="outline" size="xs">
                               Trade

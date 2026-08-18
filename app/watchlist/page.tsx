@@ -42,15 +42,15 @@ export default function WatchlistPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="bg-slate-50 dark:bg-[#1E1E21] border-b border-slate-border dark:border-[#3A3A3D] text-slate-muted dark:text-[#A1A1AA] uppercase text-[11px] font-bold tracking-wider select-none">
-                  <th className="py-3 px-4">Instrument</th>
-                  <th className="py-3 px-4 text-right">Price</th>
-                  <th className="py-3 px-4 text-right">24h Change</th>
-                  <th className="py-3 px-4 text-right">24h Volume</th>
-                  <th className="py-3 px-4 text-right">Market Cap</th>
-                  <th className="py-3 px-4 text-center">7D Trend</th>
-                  <th className="py-3 px-4 text-center">Sentiment</th>
-                  <th className="py-3 px-4 text-right">Action</th>
+                <tr className="bg-slate-50 dark:bg-[#1E1E21] border-b border-slate-border dark:border-[#3A3A3D] text-slate-muted dark:text-[#A1A1AA] uppercase text-[10px] sm:text-[11px] font-bold tracking-wider select-none">
+                  <th className="py-3 px-2.5 sm:px-4">Instrument</th>
+                  <th className="py-3 px-2.5 sm:px-4 text-right">Price</th>
+                  <th className="py-3 px-2.5 sm:px-4 text-right">24h Change</th>
+                  <th className="py-3 px-2.5 sm:px-4 text-right hidden sm:table-cell">24h Volume</th>
+                  <th className="py-3 px-2.5 sm:px-4 text-right hidden md:table-cell">Market Cap</th>
+                  <th className="py-3 px-2.5 sm:px-4 text-center hidden lg:table-cell">7D Trend</th>
+                  <th className="py-3 px-2.5 sm:px-4 text-center hidden sm:table-cell">Sentiment</th>
+                  <th className="py-3 px-2.5 sm:px-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-[#3A3A3D]">
@@ -61,42 +61,43 @@ export default function WatchlistPage() {
 
                   return (
                     <tr key={item.id} className="hover:bg-slate-50/70 dark:hover:bg-[#323236] transition-colors group">
-                      <td className="py-3.5 px-4">
-                        <Link href={`/markets/${asset.ticker || ''}`} className="flex items-center gap-3">
-                          <CompanyLogo ticker={asset.ticker} name={asset.name} size="md" />
-                          <div>
-                            <div className="font-extrabold text-slate-dark dark:text-[#F5F5F5] group-hover:text-lime-900 dark:group-hover:text-lime transition-colors">{asset.ticker || asset.name}</div>
-                            <div className="text-[11px] text-slate-muted dark:text-[#71717A] truncate max-w-[180px]">{asset.name}</div>
+                      <td className="py-3.5 px-2.5 sm:px-4">
+                        <Link href={`/markets/${asset.ticker || ''}`} className="flex items-center gap-2 sm:gap-3">
+                          <CompanyLogo ticker={asset.ticker} name={asset.name} size="sm" />
+                          <div className="min-w-0">
+                            <div className="font-extrabold text-slate-dark dark:text-[#F5F5F5] group-hover:text-lime-900 dark:group-hover:text-lime transition-colors text-xs sm:text-sm">{asset.ticker || asset.name}</div>
+                            <div className="text-[10px] sm:text-[11px] text-slate-muted dark:text-[#71717A] truncate max-w-[100px] sm:max-w-[180px]">{asset.name}</div>
                           </div>
                         </Link>
                       </td>
-                      <td className="py-3.5 px-4 font-mono font-bold text-slate-dark dark:text-[#F5F5F5] text-right">{formatCurrency(asset.current_price)}</td>
-                      <td className="py-3.5 px-4 text-right">
+                      <td className="py-3.5 px-2.5 sm:px-4 font-mono font-bold text-slate-dark dark:text-[#F5F5F5] text-right text-xs sm:text-sm">{formatCurrency(asset.current_price)}</td>
+                      <td className="py-3.5 px-2.5 sm:px-4 text-right">
                         <Badge variant={isUp ? 'up' : 'down'} size="sm">
-                          {isUp ? '+' : ''}{asset.day_change.toFixed(2)} ({formatPercent(asset.day_change_pct)})
+                          {isUp ? '+' : ''}{asset.day_change.toFixed(2)} <span className="hidden sm:inline">({formatPercent(asset.day_change_pct)})</span>
                         </Badge>
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-slate-600 dark:text-[#A1A1AA] text-right">{asset.volume_24h}</td>
-                      <td className="py-3.5 px-4 font-mono text-slate-600 dark:text-[#A1A1AA] text-right">{asset.market_cap}</td>
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3.5 px-2.5 sm:px-4 font-mono text-slate-600 dark:text-[#A1A1AA] text-right hidden sm:table-cell">{asset.volume_24h}</td>
+                      <td className="py-3.5 px-2.5 sm:px-4 font-mono text-slate-600 dark:text-[#A1A1AA] text-right hidden md:table-cell">{asset.market_cap}</td>
+                      <td className="py-3.5 px-2.5 sm:px-4 text-center hidden lg:table-cell">
                         <div className="inline-flex justify-center">
                           <Sparkline isPositive={isUp} width={75} height={22} />
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3.5 px-2.5 sm:px-4 text-center hidden sm:table-cell">
                         <Badge variant={asset.ai_sentiment === 'Bullish' ? 'lime' : 'neutral'} size="sm">
                           {asset.ai_sentiment}
                         </Badge>
                       </td>
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
+                      <td className="py-3.5 px-2.5 sm:px-4 text-right">
+                        <div className="flex items-center justify-end gap-1 sm:gap-1.5">
                           <Link href={`/trade?ticker=${asset.ticker}&type=BUY`}>
                             <Button variant="lime" size="xs">Buy</Button>
                           </Link>
                           <button
                             onClick={() => toggleWatchlist({ assetId: item.asset_id || asset.id, ticker: asset.ticker })}
-                            className="w-7 h-7 rounded-full flex items-center justify-center text-slate-400 dark:text-[#71717A] hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 dark:text-[#71717A] hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
                             title="Remove from Watchlist"
+                            aria-label="Remove from Watchlist"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>

@@ -111,13 +111,13 @@ function TradeContent() {
         </Link>
       </div>
 
-      <Card className="flex flex-col gap-5 p-6">
+      <Card className="flex flex-col gap-5 p-4 sm:p-6">
         {/* BUY / SELL Switcher */}
         <div className="grid grid-cols-2 gap-2 bg-slate-subtle dark:bg-[#1E1E21] border border-slate-200/60 dark:border-[#3A3A3D] p-1 rounded-xl">
           <button
             type="button"
             onClick={() => setTradeType('BUY')}
-            className={`py-2.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
+            className={`py-2.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer min-h-[40px] ${
               tradeType === 'BUY'
                 ? 'bg-lime text-[#0F0B0A] shadow-sm'
                 : 'text-slate-500 dark:text-[#A1A1AA] hover:text-slate-dark dark:hover:text-[#F5F5F5]'
@@ -128,7 +128,7 @@ function TradeContent() {
           <button
             type="button"
             onClick={() => setTradeType('SELL')}
-            className={`py-2.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
+            className={`py-2.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer min-h-[40px] ${
               tradeType === 'SELL'
                 ? 'bg-red-500 text-white shadow-sm'
                 : 'text-slate-500 dark:text-[#A1A1AA] hover:text-slate-dark dark:hover:text-[#F5F5F5]'
@@ -147,7 +147,7 @@ function TradeContent() {
                 key={a.ticker}
                 type="button"
                 onClick={() => setSelectedTicker(a.ticker)}
-                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                className={`p-2 sm:p-2.5 rounded-xl border text-left transition-all cursor-pointer min-h-[44px] ${
                   selectedTicker.toUpperCase() === a.ticker.toUpperCase()
                     ? 'border-lime dark:border-lime/80 bg-lime-50/50 dark:bg-[#353539] shadow-sm'
                     : 'border-slate-border dark:border-[#3A3A3D] hover:border-slate-300 dark:hover:border-[#4A4A4E] bg-white dark:bg-[#1E1E21]'
@@ -159,7 +159,7 @@ function TradeContent() {
                     {Number(a.day_change_pct).toFixed(1)}%
                   </Badge>
                 </div>
-                <div className="text-xs font-mono font-semibold text-slate-muted dark:text-[#A1A1AA] mt-1">
+                <div className="text-xs font-mono font-semibold text-slate-muted dark:text-[#A1A1AA] mt-1 truncate">
                   {formatCurrency(Number(a.current_price))}
                 </div>
               </button>
@@ -169,15 +169,15 @@ function TradeContent() {
 
         {/* Selected Instrument Summary Card */}
         {asset && (
-          <div className="flex items-center justify-between p-4 rounded-xl bg-slate-subtle dark:bg-[#1E1E21] border border-slate-border dark:border-[#3A3A3D]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-xl bg-slate-subtle dark:bg-[#1E1E21] border border-slate-border dark:border-[#3A3A3D]">
             <div className="flex items-center gap-3">
               <CompanyLogo ticker={asset.ticker} name={asset.name} size="md" />
-              <div>
+              <div className="min-w-0">
                 <div className="font-extrabold text-sm text-slate-dark dark:text-[#F5F5F5]">{asset.ticker}</div>
-                <div className="text-xs text-slate-muted dark:text-[#A1A1AA]">{asset.name}</div>
+                <div className="text-xs text-slate-muted dark:text-[#A1A1AA] truncate max-w-[200px]">{asset.name}</div>
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-left sm:text-right">
               <div className="font-mono font-extrabold text-base text-slate-dark dark:text-[#F5F5F5]">
                 {formatCurrency(currentPrice)}
               </div>
@@ -193,16 +193,18 @@ function TradeContent() {
         {/* Order Type */}
         <div>
           <label className="text-xs font-bold text-slate-dark dark:text-[#F5F5F5] mb-1.5 block">Order Type</label>
-          <PillTabs
-            items={[
-              { id: 'MARKET', label: 'Market (Instant)' },
-              { id: 'LIMIT', label: 'Limit Order' },
-              { id: 'STOP', label: 'Stop Loss' },
-            ]}
-            activeId={orderType}
-            onChange={(id) => setOrderType(id as any)}
-            variant="lime"
-          />
+          <div className="overflow-x-auto no-scrollbar max-w-full pb-0.5">
+            <PillTabs
+              items={[
+                { id: 'MARKET', label: 'Market (Instant)' },
+                { id: 'LIMIT', label: 'Limit Order' },
+                { id: 'STOP', label: 'Stop Loss' },
+              ]}
+              activeId={orderType}
+              onChange={(id) => setOrderType(id as any)}
+              variant="lime"
+            />
+          </div>
         </div>
 
         {/* Quantity (Shares) */}

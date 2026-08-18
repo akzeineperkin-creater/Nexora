@@ -5,6 +5,7 @@ import { useTheme } from '@/providers/ThemeProvider';
 
 interface SparklineProps {
   points?: number[];
+  data?: number[];
   isPositive?: boolean;
   width?: number;
   height?: number;
@@ -12,6 +13,7 @@ interface SparklineProps {
 
 export function Sparkline({
   points,
+  data: dataProp,
   isPositive = true,
   width = 80,
   height = 24,
@@ -20,8 +22,10 @@ export function Sparkline({
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
 
+  const rawPoints = points || dataProp;
+
   const data = React.useMemo(() => {
-    if (points && points.length > 1) return points;
+    if (rawPoints && rawPoints.length > 1) return rawPoints;
     // Generate dummy smooth sparkline
     const res = [100];
     for (let i = 1; i < 12; i++) {
@@ -31,7 +35,7 @@ export function Sparkline({
       res.push(100 + slope + wave);
     }
     return res;
-  }, [points, isPositive]);
+  }, [rawPoints, isPositive]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

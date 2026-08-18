@@ -78,17 +78,21 @@ export default function CalendarPage() {
           </p>
         </div>
 
-        <PillTabs
-          items={[
-            { id: 'all', label: 'All Events' },
-            { id: 'economic', label: 'Economic Prints' },
-            { id: 'earnings', label: 'Earnings' },
-            { id: 'events', label: 'Key Conferences' },
-          ]}
-          activeId={activeTab}
-          onChange={setActiveTab}
-          variant="lime"
-        />
+        <div className="overflow-x-auto no-scrollbar max-w-full pb-0.5">
+          <div className="shrink-0">
+            <PillTabs
+              items={[
+                { id: 'all', label: 'All Events' },
+                { id: 'economic', label: 'Economic Prints' },
+                { id: 'earnings', label: 'Earnings' },
+                { id: 'events', label: 'Key Conferences' },
+              ]}
+              activeId={activeTab}
+              onChange={setActiveTab}
+              variant="lime"
+            />
+          </div>
+        </div>
       </div>
 
       {/* CALENDAR TABLE */}
@@ -96,33 +100,33 @@ export default function CalendarPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="bg-slate-50 dark:bg-[#1E1E21] border-b border-slate-border dark:border-[#3A3A3D] text-slate-muted dark:text-[#A1A1AA] uppercase text-[11px] font-bold tracking-wider select-none">
-                <th className="py-3 px-4">Date & Time</th>
-                <th className="py-3 px-4">Market</th>
-                <th className="py-3 px-4">Event</th>
-                <th className="py-3 px-4">Importance</th>
-                <th className="py-3 px-4">Consensus</th>
-                <th className="py-3 px-4">Prior</th>
-                <th className="py-3 px-4 text-right">Related Asset</th>
+              <tr className="bg-slate-50 dark:bg-[#1E1E21] border-b border-slate-border dark:border-[#3A3A3D] text-slate-muted dark:text-[#A1A1AA] uppercase text-[10px] sm:text-[11px] font-bold tracking-wider select-none">
+                <th className="py-3 px-2.5 sm:px-4">Date & Time</th>
+                <th className="py-3 px-2.5 sm:px-4 hidden sm:table-cell">Market</th>
+                <th className="py-3 px-2.5 sm:px-4">Event</th>
+                <th className="py-3 px-2.5 sm:px-4 hidden sm:table-cell">Importance</th>
+                <th className="py-3 px-2.5 sm:px-4 hidden md:table-cell">Consensus</th>
+                <th className="py-3 px-2.5 sm:px-4 hidden md:table-cell">Prior</th>
+                <th className="py-3 px-2.5 sm:px-4 text-right">Related Asset</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-[#3A3A3D]">
               {filtered.map((e) => (
                 <tr key={e.id} className="hover:bg-slate-50/70 dark:hover:bg-[#323236] transition-colors">
-                  <td className="py-3.5 px-4 font-mono font-semibold text-slate-dark dark:text-[#F5F5F5] whitespace-nowrap">{e.date}</td>
-                  <td className="py-3.5 px-4 text-slate-dark dark:text-[#F5F5F5]">{e.country}</td>
-                  <td className="py-3.5 px-4">
-                    <div className="font-bold text-slate-dark dark:text-[#F5F5F5]">{e.title}</div>
-                    <div className="text-[11px] text-slate-muted dark:text-[#71717A] mt-0.5">{e.impact}</div>
+                  <td className="py-3.5 px-2.5 sm:px-4 font-mono font-semibold text-slate-dark dark:text-[#F5F5F5] whitespace-nowrap text-xs">{e.date}</td>
+                  <td className="py-3.5 px-2.5 sm:px-4 text-slate-dark dark:text-[#F5F5F5] hidden sm:table-cell">{e.country}</td>
+                  <td className="py-3.5 px-2.5 sm:px-4">
+                    <div className="font-bold text-slate-dark dark:text-[#F5F5F5] text-xs sm:text-sm">{e.title}</div>
+                    <div className="text-[10px] sm:text-[11px] text-slate-muted dark:text-[#71717A] mt-0.5 line-clamp-2 max-w-sm">{e.impact}</div>
                   </td>
-                  <td className="py-3.5 px-4">
+                  <td className="py-3.5 px-2.5 sm:px-4 hidden sm:table-cell">
                     <Badge variant={e.importance === 'High' ? 'down' : 'neutral'} size="sm">
                       {e.importance}
                     </Badge>
                   </td>
-                  <td className="py-3.5 px-4 font-mono font-bold text-slate-dark dark:text-[#F5F5F5]">{e.forecast}</td>
-                  <td className="py-3.5 px-4 font-mono text-slate-muted dark:text-[#71717A]">{e.previous}</td>
-                  <td className="py-3.5 px-4 text-right">
+                  <td className="py-3.5 px-2.5 sm:px-4 font-mono font-bold text-slate-dark dark:text-[#F5F5F5] hidden md:table-cell">{e.forecast}</td>
+                  <td className="py-3.5 px-2.5 sm:px-4 font-mono text-slate-muted dark:text-[#71717A] hidden md:table-cell">{e.previous}</td>
+                  <td className="py-3.5 px-2.5 sm:px-4 text-right">
                     {e.ticker ? (
                       <Link href={`/markets/${e.ticker}`}>
                         <Badge variant="lime" size="sm" className="hover:border-lime cursor-pointer font-bold">
@@ -130,7 +134,7 @@ export default function CalendarPage() {
                         </Badge>
                       </Link>
                     ) : (
-                      <span className="text-[11px] text-slate-muted dark:text-[#71717A]">Broad Market</span>
+                      <span className="text-[10px] sm:text-[11px] text-slate-muted dark:text-[#71717A]">Broad Market</span>
                     )}
                   </td>
                 </tr>

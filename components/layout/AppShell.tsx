@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { TickerTape } from './TickerTape';
+import { MobileBottomNav } from './MobileBottomNav';
 import { GlobalSearchModal } from '@/components/search/GlobalSearchModal';
 import { TradeModal } from '@/components/trade/TradeModal';
 import { useAuth } from '@/providers/AuthProvider';
@@ -43,13 +44,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   // For /login and /register routes, render without persistent shell
   if (isAuthPage) {
-    return <main className="min-h-screen bg-slate-app antialiased">{children}</main>;
+    return <main className="min-h-screen bg-slate-app antialiased w-full overflow-x-hidden">{children}</main>;
   }
 
   // Prevent ANY flash of trader/dashboard UI while checking auth session or if unauthenticated
   if (isLoading || !user) {
     return (
-      <div className="min-h-screen bg-slate-app flex flex-col items-center justify-center antialiased select-none">
+      <div className="min-h-screen bg-slate-app flex flex-col items-center justify-center antialiased select-none w-full">
         <div className="flex flex-col items-center gap-3">
           <div className="w-12 h-12 rounded-2xl overflow-hidden bg-black flex items-center justify-center shadow-md border border-slate-800 animate-pulse">
             <Image
@@ -71,15 +72,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-app antialiased">
-      {/* Fixed Left Sidebar (228px) */}
+    <div className="flex min-h-screen bg-slate-app antialiased w-full overflow-x-hidden">
+      {/* Fixed Left Sidebar (228px on Desktop, Native Drawer on Mobile) */}
       <Sidebar
         isOpenMobile={isMobileMenuOpen}
         onCloseMobile={() => setIsMobileMenuOpen(false)}
       />
 
       {/* Main Content Area (Fixed 228px left margin on desktop) */}
-      <div className="lg:ml-[228px] flex-1 flex flex-col min-w-0 min-h-screen">
+      <div className="lg:ml-[228px] flex-1 flex flex-col min-w-0 min-h-screen max-w-full overflow-x-hidden">
         {/* Sticky Topbar */}
         <Topbar
           onOpenSearch={() => setIsSearchOpen(true)}
@@ -90,10 +91,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Real-time Ticker Tape */}
         <TickerTape />
 
-        {/* Dynamic Page Viewport (Subtle CSS fade-in, zero layout shift) */}
-        <main className="flex-1 p-5 md:p-8 max-w-[1440px] w-full mx-auto animate-in fade-in duration-150">
+        {/* Dynamic Page Viewport (Safe bottom padding on mobile for MobileBottomNav) */}
+        <main className="flex-1 p-3 sm:p-5 md:p-8 pb-24 lg:pb-8 max-w-[1440px] w-full mx-auto animate-in fade-in duration-150 overflow-x-hidden">
           {children}
         </main>
+
+        {/* Mobile Fixed Bottom Navigation Bar (< 1024px) */}
+        <MobileBottomNav
+          onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
+          onOpenQuickTrade={() => setIsTradeOpen(true)}
+        />
       </div>
 
       {/* Global Search Modal */}

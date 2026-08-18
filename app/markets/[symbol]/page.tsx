@@ -428,7 +428,7 @@ export default function AssetDetailPage() {
         {/* LEFT 2 COLUMNS: Interactive Price Chart, Performance & About */}
         <div className="lg:col-span-2 flex flex-col gap-6">
           {/* INTERACTIVE PRICE CHART CARD */}
-          <Card className="p-6">
+          <Card className="p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
               <div>
                 <CardTitle>Interactive Market Chart</CardTitle>
@@ -436,20 +436,22 @@ export default function AssetDetailPage() {
               </div>
 
               {/* TIMEFRAME BUTTONS: 1D, 5D, 1M, 3M, 6M, YTD, 1Y, 5Y, ALL */}
-              <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#1E1E21] p-1 rounded-full border border-slate-200 dark:border-[#3A3A3D] overflow-x-auto select-none">
-                {timeframes.map((tf) => (
-                  <button
-                    key={tf.id}
-                    onClick={() => setSelectedTimeframe(tf.id)}
-                    className={`px-3 py-1 text-xs font-bold rounded-full transition-all cursor-pointer whitespace-nowrap ${
-                      selectedTimeframe === tf.id
-                        ? 'bg-lime text-[#0F0B0A] font-extrabold shadow-sm'
-                        : 'text-slate-600 dark:text-[#A1A1AA] hover:text-slate-dark dark:hover:text-[#F5F5F5] hover:bg-slate-200/60 dark:hover:bg-[#28282B]'
-                    }`}
-                  >
-                    {tf.label}
-                  </button>
-                ))}
+              <div className="overflow-x-auto no-scrollbar max-w-full pb-0.5">
+                <div className="flex items-center gap-1 bg-slate-100 dark:bg-[#1E1E21] p-1 rounded-full border border-slate-200 dark:border-[#3A3A3D] select-none shrink-0">
+                  {timeframes.map((tf) => (
+                    <button
+                      key={tf.id}
+                      onClick={() => setSelectedTimeframe(tf.id)}
+                      className={`px-2.5 sm:px-3 py-1 text-xs font-bold rounded-full transition-all cursor-pointer whitespace-nowrap min-h-[30px] ${
+                        selectedTimeframe === tf.id
+                          ? 'bg-lime text-[#0F0B0A] font-extrabold shadow-sm'
+                          : 'text-slate-600 dark:text-[#A1A1AA] hover:text-slate-dark dark:hover:text-[#F5F5F5] hover:bg-slate-200/60 dark:hover:bg-[#28282B]'
+                      }`}
+                    >
+                      {tf.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 

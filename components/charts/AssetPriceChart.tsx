@@ -73,6 +73,21 @@ export function AssetPriceChart({
     }
   }, [points, timeframe]);
 
+  const [redrawKey, setRedrawKey] = useState(0);
+
+  // ResizeObserver for dynamic canvas redraw on mobile orientation / screen resize
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const ro = new ResizeObserver(() => {
+      setRedrawKey((prev) => prev + 1);
+    });
+
+    ro.observe(container);
+    return () => ro.disconnect();
+  }, []);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
@@ -183,42 +198,41 @@ export function AssetPriceChart({
       ctx.beginPath();
       ctx.strokeStyle = isDark ? '#71717A' : '#94A3B8';
       ctx.lineWidth = 1.25;
+      ctx.strokeStyle = isDark ? '#52525B' : '#CBD5E1';
+      ctx.lineWidth = 1;
       ctx.setLineDash([3, 3]);
       ctx.moveTo(hx, padding.top);
-      ctx.lineTo(hx, height - padding.bottom);
+      ctx.lineTo(hx, padding.top + chartH);
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Outer glow circle
       ctx.beginPath();
       ctx.arc(hx, hy, 7, 0, Math.PI * 2);
       ctx.fillStyle = isPeriodPositive ? 'rgba(184, 245, 0, 0.4)' : 'rgba(239, 68, 68, 0.4)';
       ctx.fill();
 
-      // Inner solid point
       ctx.beginPath();
       ctx.arc(hx, hy, 4, 0, Math.PI * 2);
-      ctx.fillStyle = isDark ? '#0F0B0A' : '#0F172A';
+      ctx.fillStyle = isDark ? '#0F0B0A' : '#FFFFFF';
       ctx.fill();
       ctx.strokeStyle = isPeriodPositive ? '#B8F500' : '#EF4444';
       ctx.lineWidth = 2;
       ctx.stroke();
     }
-  }, [points, height, isPeriodPositive, hoverData, currentPrice, isDark, timeLabels]);
+  }, [points, height, isPeriodPositive, currentPrice, hoverData, isDark, timeLabels, redrawKey]);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const updateHoverFromClientX = (clientX: number) => {
     const canvas = canvasRef.current;
     if (!canvas || points.length < 2) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const paddingLeft = 20;
-    const chartW = rect.width - 40;
+    const x = clientX - rect.left;
+    const paddingLeft = 15;
+    const chartW = Math.max(10, rect.width - 30);
 
     const normalizedX = Math.max(0, Math.min(1, (x - paddingLeft) / chartW));
     const idx = Math.round(normalizedX * (points.length - 1));
     const point = points[idx];
-    if (!point) return;
 
     const vals = points.map((p) => p.price || p.close || currentPrice);
     const minVal = Math.min(...vals);
@@ -226,12 +240,21 @@ export function AssetPriceChart({
     const range = maxVal - minVal || 1;
     const yMin = minVal - range * 0.08;
     const yMax = maxVal + range * 0.08;
-    const chartH = height - 65;
-    const val = point.price || point.close || currentPrice;
-    const py = 25 + chartH - ((val - yMin) / (yMax - yMin)) * chartH;
+    const chartH = Math.max(10, height - 60);
+    const py = 25 + chartH - (((point.price || point.close || currentPrice) - yMin) / (yMax - yMin)) * chartH;
     const px = paddingLeft + (idx / (points.length - 1)) * chartW;
 
     setHoverData({ point, x: px, y: py, index: idx });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    updateHoverFromClientX(e.clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length > 0) {
+      updateHoverFromClientX(e.touches[0].clientX);
+    }
   };
 
   const handleMouseLeave = () => {
@@ -241,14 +264,14 @@ export function AssetPriceChart({
   const displayedDate = hoverData?.point.date;
 
   return (
-    <div className="w-full select-none">
+    <div className="w-full max-w-full select-none overflow-hidden">
       {/* Interactive Price Header */}
       <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2">
-        <div className="flex items-baseline gap-3">
-          <span className="text-3xl sm:text-4xl font-extrabold font-mono text-slate-dark dark:text-[#F5F5F5] tracking-tight">
+        <div className="flex items-baseline gap-2 sm:gap-3 flex-wrap">
+          <span className="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-mono text-slate-dark dark:text-[#F5F5F5] tracking-tight">
             {formatCurrency(activePrice)}
           </span>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <span
               className={`inline-flex items-center gap-0.5 text-xs sm:text-sm font-bold font-mono px-2 py-0.5 rounded-md ${
                 isPeriodPositive
@@ -273,7 +296,7 @@ export function AssetPriceChart({
       </div>
 
       {/* Canvas Area */}
-      <div ref={containerRef} className="relative w-full" style={{ height: `${height}px` }}>
+      <div ref={containerRef} className="relative w-full max-w-full" style={{ height: `${height}px` }}>
         {points.length < 2 ? (
           <div className="w-full h-full flex flex-col items-center justify-center text-center text-slate-400 text-xs bg-slate-50/50 dark:bg-[#28282B]/40 rounded-xl border border-slate-border dark:border-[#3A3A3D]">
             <span>Loading live market chart...</span>
@@ -283,7 +306,9 @@ export function AssetPriceChart({
             ref={canvasRef}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            className="cursor-crosshair block w-full"
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleMouseLeave}
+            className="cursor-crosshair block w-full touch-none"
           />
         )}
 
@@ -291,7 +316,7 @@ export function AssetPriceChart({
         {hoverData && (
           <div
             className="absolute pointer-events-none bg-slate-900/95 dark:bg-[#28282B] text-white rounded-xl px-3.5 py-2 text-xs shadow-2xl border border-white/15 dark:border-[#3A3A3D] z-20 -translate-x-1/2 -translate-y-full mb-3 whitespace-nowrap backdrop-blur-md"
-            style={{ left: `${hoverData.x}px`, top: `${hoverData.y}px` }}
+            style={{ left: `${Math.max(60, Math.min((containerRef.current?.clientWidth || 300) - 60, hoverData.x))}px`, top: `${hoverData.y}px` }}
           >
             <div className="text-slate-400 dark:text-[#71717A] text-[10px] font-mono mb-0.5">
               {hoverData.point.date} {timeframe === '1D' ? 'EDT' : ''}
@@ -313,12 +338,12 @@ export function AssetPriceChart({
 
       {/* High / Low Period Range Bar */}
       {points.length >= 2 && (
-        <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 dark:text-[#71717A] pt-2.5 border-t border-slate-100 dark:border-[#3A3A3D]">
+        <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 dark:text-[#71717A] pt-2.5 border-t border-slate-100 dark:border-[#3A3A3D] flex-wrap gap-2">
           <div>
             <span className="text-slate-500 dark:text-[#A1A1AA] font-medium">Period Low: </span>
             <span className="font-bold text-slate-700 dark:text-[#F5F5F5]">{formatCurrency(Math.min(...points.map((p) => p.price || currentPrice)))}</span>
           </div>
-          <span className="text-slate-400 dark:text-[#71717A] font-semibold">
+          <span className="text-slate-400 dark:text-[#71717A] font-semibold hidden sm:inline">
             {timeframe === '1D' ? 'US Eastern Time (EDT) Live Session' : `${timeframe} Interactive Window`}
           </span>
           <div>

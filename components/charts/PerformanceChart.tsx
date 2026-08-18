@@ -27,8 +27,18 @@ export function PerformanceChart({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [timeframe, setTimeframe] = useState<'1W' | '1M' | '3M' | '6M' | 'YTD' | '1Y' | 'ALL'>('1M');
   const [hoverData, setHoverData] = useState<{ point: PerformancePoint; x: number; y: number } | null>(null);
+  const [redrawKey, setRedrawKey] = useState(0);
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver(() => {
+      setRedrawKey((k) => k + 1);
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   // Generate dynamic time-series points if not passed directly
   const points: PerformancePoint[] = React.useMemo(() => {
@@ -126,57 +136,74 @@ export function PerformanceChart({
         else ctx.lineTo(x, y);
       });
       ctx.stroke();
+
+      ctx.beginPath();
+      ctx.strokeStyle = isDark ? '#52525B' : '#94A3B8';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([3, 3]);
+
+      points.forEach((p, i) => {
+        const bm = p.benchmarkValue || 500;
+        const bx = getX(i);
+        const by = padding.top + chartH - ((bm - bmMin) / bmRange) * chartH;
+        if (i === 0) ctx.moveTo(bx, by);
+        else ctx.lineTo(bx, by);
+      });
+      ctx.stroke();
       ctx.setLineDash([]);
     }
 
-    // Gradient Fill under Lime Line
-    const grad = ctx.createLinearGradient(0, padding.top, 0, height);
-    grad.addColorStop(0, isDark ? 'rgba(184, 245, 0, 0.28)' : 'rgba(184, 238, 50, 0.38)');
-    grad.addColorStop(0.65, isDark ? 'rgba(184, 245, 0, 0.04)' : 'rgba(184, 238, 50, 0.08)');
-    grad.addColorStop(1, isDark ? 'rgba(40, 40, 43, 0)' : 'rgba(255, 255, 255, 0)');
+    // Main Asset Area Gradient (Lime #B8F500)
+    const gradient = ctx.createLinearGradient(0, padding.top, 0, height - padding.bottom);
+    gradient.addColorStop(0, isDark ? 'rgba(184, 245, 0, 0.28)' : 'rgba(184, 245, 0, 0.45)');
+    gradient.addColorStop(0.7, isDark ? 'rgba(184, 245, 0, 0.05)' : 'rgba(184, 245, 0, 0.08)');
+    gradient.addColorStop(1, 'rgba(184, 245, 0, 0)');
 
     ctx.beginPath();
-    ctx.moveTo(getX(0), getY(points[0].value));
-    for (let i = 1; i < points.length; i++) {
-      const prevX = getX(i - 1);
-      const prevY = getY(points[i - 1].value);
-      const curX = getX(i);
-      const curY = getY(points[i].value);
-      const midX = (prevX + curX) / 2;
-      ctx.bezierCurveTo(midX, prevY, midX, curY, curX, curY);
-    }
+    points.forEach((p, i) => {
+      const px = getX(i);
+      const py = getY(p.value);
+      if (i === 0) ctx.moveTo(px, py);
+      else {
+        const prevX = getX(i - 1);
+        const prevY = getY(points[i - 1].value);
+        const cpX = (prevX + px) / 2;
+        ctx.bezierCurveTo(cpX, prevY, cpX, py, px, py);
+      }
+    });
     ctx.lineTo(getX(points.length - 1), height - padding.bottom);
     ctx.lineTo(getX(0), height - padding.bottom);
     ctx.closePath();
-    ctx.fillStyle = grad;
+    ctx.fillStyle = gradient;
     ctx.fill();
 
-    // Primary Signature Lime Line Stroke
+    // Main Line Stroke
     ctx.beginPath();
-    ctx.strokeStyle = isDark ? '#B8F500' : '#69A300';
-    ctx.lineWidth = 2.8;
-    ctx.lineJoin = 'round';
+    points.forEach((p, i) => {
+      const px = getX(i);
+      const py = getY(p.value);
+      if (i === 0) ctx.moveTo(px, py);
+      else {
+        const prevX = getX(i - 1);
+        const prevY = getY(points[i - 1].value);
+        const cpX = (prevX + px) / 2;
+        ctx.bezierCurveTo(cpX, prevY, cpX, py, px, py);
+      }
+    });
+    ctx.strokeStyle = '#B8F500';
+    ctx.lineWidth = 2.5;
     ctx.lineCap = 'round';
-
-    ctx.moveTo(getX(0), getY(points[0].value));
-    for (let i = 1; i < points.length; i++) {
-      const prevX = getX(i - 1);
-      const prevY = getY(points[i - 1].value);
-      const curX = getX(i);
-      const curY = getY(points[i].value);
-      const midX = (prevX + curX) / 2;
-      ctx.bezierCurveTo(midX, prevY, midX, curY, curX, curY);
-    }
+    ctx.lineJoin = 'round';
     ctx.stroke();
 
-    // Crosshair Guide if Hovering
+    // Hover Crosshair
     if (hoverData) {
       const hx = hoverData.x;
       const hy = hoverData.y;
 
       ctx.beginPath();
-      ctx.strokeStyle = isDark ? '#71717A' : '#94A3B8';
-      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = isDark ? '#52525B' : '#CBD5E1';
+      ctx.lineWidth = 1;
       ctx.setLineDash([3, 3]);
       ctx.moveTo(hx, padding.top);
       ctx.lineTo(hx, height - padding.bottom);
@@ -196,14 +223,14 @@ export function PerformanceChart({
       ctx.lineWidth = 2;
       ctx.stroke();
     }
-  }, [points, height, showBenchmark, hoverData, isDark]);
+  }, [points, height, showBenchmark, hoverData, isDark, redrawKey]);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const updateHoverFromClientX = (clientX: number) => {
     const canvas = canvasRef.current;
     if (!canvas || points.length < 2) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
+    const x = clientX - rect.left;
     const paddingLeft = 15;
     const chartW = rect.width - 30;
 
@@ -224,6 +251,16 @@ export function PerformanceChart({
     setHoverData({ point, x: px, y: py });
   };
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    updateHoverFromClientX(e.clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length > 0) {
+      updateHoverFromClientX(e.touches[0].clientX);
+    }
+  };
+
   const handleMouseLeave = () => {
     setHoverData(null);
   };
@@ -239,49 +276,53 @@ export function PerformanceChart({
   ];
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-full overflow-hidden">
       {/* Header with Timeframes */}
       <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
         <div>
           <span className="text-xs font-bold text-slate-muted dark:text-[#A1A1AA] uppercase tracking-wider">
             Simulated Performance
           </span>
-          <div className="text-2xl font-extrabold font-mono text-slate-dark dark:text-[#F5F5F5] tracking-tight">
+          <div className="text-xl sm:text-2xl font-extrabold font-mono text-slate-dark dark:text-[#F5F5F5] tracking-tight">
             {formatCurrency(hoverData ? hoverData.point.value : baseValue)}
           </div>
         </div>
 
-        <div className="inline-flex bg-slate-100 dark:bg-[#0F0B0A] p-1 rounded-xl border border-slate-border dark:border-[#3A3A3D] gap-1">
-          {timeframes.map((tf) => (
-            <button
-              key={tf}
-              onClick={() => setTimeframe(tf)}
-              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
-                timeframe === tf
-                  ? 'bg-lime text-[#0F0B0A] shadow-sm'
-                  : 'text-slate-600 dark:text-[#A1A1AA] hover:text-slate-dark dark:hover:text-[#F5F5F5]'
-              }`}
-            >
-              {tf}
-            </button>
-          ))}
+        <div className="overflow-x-auto no-scrollbar max-w-full pb-1">
+          <div className="inline-flex bg-slate-100 dark:bg-[#0F0B0A] p-1 rounded-xl border border-slate-border dark:border-[#3A3A3D] gap-1 shrink-0">
+            {timeframes.map((tf) => (
+              <button
+                key={tf}
+                onClick={() => setTimeframe(tf)}
+                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all min-h-[32px] cursor-pointer ${
+                  timeframe === tf
+                    ? 'bg-lime text-[#0F0B0A] shadow-sm'
+                    : 'text-slate-600 dark:text-[#A1A1AA] hover:text-slate-dark dark:hover:text-[#F5F5F5]'
+                }`}
+              >
+                {tf}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Canvas Container */}
-      <div ref={containerRef} className="relative w-full" style={{ height: `${height}px` }}>
+      <div ref={containerRef} className="relative w-full max-w-full" style={{ height: `${height}px` }}>
         <canvas
           ref={canvasRef}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
-          className="cursor-crosshair block w-full"
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleMouseLeave}
+          className="cursor-crosshair block w-full touch-none"
         />
 
         {/* Hover Tooltip */}
         {hoverData && (
           <div
             className="absolute pointer-events-none bg-slate-900/95 dark:bg-[#28282B] text-white rounded-xl px-3.5 py-2 text-xs shadow-xl border border-white/15 dark:border-[#3A3A3D] z-20 -translate-x-1/2 -translate-y-full mb-2 whitespace-nowrap backdrop-blur-md"
-            style={{ left: `${hoverData.x}px`, top: `${hoverData.y}px` }}
+            style={{ left: `${Math.max(60, Math.min((containerRef.current?.clientWidth || 300) - 60, hoverData.x))}px`, top: `${hoverData.y}px` }}
           >
             <div className="text-slate-400 dark:text-[#71717A] text-[11px] font-mono">{hoverData.point.date}</div>
             <div className="font-extrabold font-mono text-sm text-lime">{formatCurrency(hoverData.point.value)}</div>

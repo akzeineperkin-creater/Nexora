@@ -93,14 +93,14 @@ export default function VirtualCashPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-6 font-mono text-right">
+          <div className="flex items-center gap-4 sm:gap-6 font-mono text-left sm:text-right flex-wrap">
             <div>
               <div className="text-xs text-slate-muted dark:text-[#A1A1AA]">Available Buying Power</div>
-              <div className="text-xl font-bold text-lime-900 dark:text-lime mt-0.5">{formatCurrency(cashBalance)}</div>
+              <div className="text-lg sm:text-xl font-bold text-lime-900 dark:text-lime mt-0.5">{formatCurrency(cashBalance)}</div>
             </div>
             <div>
               <div className="text-xs text-slate-muted dark:text-[#A1A1AA]">Invested in Assets</div>
-              <div className="text-xl font-bold text-slate-dark dark:text-[#F5F5F5] mt-0.5">{formatCurrency(totalInvested)}</div>
+              <div className="text-lg sm:text-xl font-bold text-slate-dark dark:text-[#F5F5F5] mt-0.5">{formatCurrency(totalInvested)}</div>
             </div>
           </div>
         </div>

@@ -71,13 +71,13 @@ export function Sidebar({ isOpenMobile, onCloseMobile }: SidebarProps) {
 
       <aside
         className={cn(
-          'w-[228px] min-w-[228px] max-w-[228px] h-screen fixed top-0 left-0 bottom-0 bg-white dark:bg-[#0F0B0A] border-r border-slate-border dark:border-[#3A3A3D] flex flex-col z-40 transition-all duration-200 overflow-y-auto overflow-x-hidden select-none',
+          'w-[280px] max-w-[85vw] lg:w-[228px] lg:min-w-[228px] lg:max-w-[228px] h-screen fixed top-0 left-0 bottom-0 bg-white dark:bg-[#0F0B0A] border-r border-slate-border dark:border-[#3A3A3D] flex flex-col z-50 transition-all duration-200 overflow-y-auto overflow-x-hidden select-none',
           isOpenMobile ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
         )}
       >
         {/* BRAND LOGO HEADER */}
         <div className="p-5 pb-4 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-2.5 group select-none">
+          <Link href="/dashboard" onClick={onCloseMobile} className="flex items-center gap-2.5 group select-none">
             <div className="w-[36px] h-[36px] rounded-xl overflow-hidden bg-black flex items-center justify-center shadow-sm shrink-0 border border-slate-800 dark:border-[#3A3A3D]">
               <Image
                 src="/logo.png"
@@ -99,10 +99,10 @@ export function Sidebar({ isOpenMobile, onCloseMobile }: SidebarProps) {
           </Link>
           <button
             onClick={onCloseMobile}
-            className="lg:hidden w-8 h-8 rounded-full flex items-center justify-center text-slate-muted dark:text-[#A1A1AA] hover:text-slate-dark dark:hover:text-[#F5F5F5]"
+            className="lg:hidden w-10 h-10 rounded-full flex items-center justify-center text-slate-muted dark:text-[#A1A1AA] hover:text-slate-dark dark:hover:text-[#F5F5F5] hover:bg-slate-100 dark:hover:bg-[#28282B] cursor-pointer"
             aria-label="Close navigation"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 

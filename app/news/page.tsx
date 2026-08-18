@@ -180,9 +180,9 @@ export default function NewsPage() {
       )}
 
       {/* 3. FILTER & SEARCH CONTROLS */}
-      <GlassCard className="p-4 flex flex-col gap-3">
+      <GlassCard className="p-3 sm:p-4 flex flex-col gap-3">
         {/* Top: 16 Curated Category Pills */}
-        <div className="overflow-x-auto pb-1">
+        <div className="overflow-x-auto no-scrollbar pb-1 max-w-full">
           <div className="flex items-center gap-1.5 min-w-max">
             {categories.map((c) => (
               <button
@@ -191,7 +191,7 @@ export default function NewsPage() {
                   setSelectedCategory(c.id);
                   setFilterMode('all');
                 }}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all min-h-[32px] cursor-pointer ${
                   selectedCategory === c.id && filterMode === 'all'
                     ? 'bg-lime text-[#0F0B0A] shadow-sm'
                     : 'bg-slate-100 dark:bg-[#1E1E21] hover:bg-slate-200 dark:hover:bg-[#323236] text-slate-600 dark:text-[#A1A1AA] dark:hover:text-[#F5F5F5]'
@@ -205,53 +205,55 @@ export default function NewsPage() {
 
         {/* Bottom: Personalized Watchlist / Portfolio Filter & Search Box */}
         <div className="pt-3 border-t border-slate-100 dark:border-[#3A3A3D] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 bg-slate-100/80 dark:bg-[#1E1E21] p-1 rounded-full border border-slate-200 dark:border-[#3A3A3D] w-fit">
-            <button
-              onClick={() => setFilterMode('all')}
-              className={`px-3.5 py-1 text-xs font-bold rounded-full transition-all cursor-pointer ${
-                filterMode === 'all'
-                  ? 'bg-white dark:bg-[#28282B] text-slate-dark dark:text-[#F5F5F5] shadow-sm'
-                  : 'text-slate-500 dark:text-[#71717A] hover:text-slate-dark dark:hover:text-[#F5F5F5]'
-              }`}
-            >
-              All Stories
-            </button>
-            <button
-              onClick={() => setFilterMode('watchlist')}
-              className={`px-3.5 py-1 text-xs font-bold rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
-                filterMode === 'watchlist'
-                  ? 'bg-amber-400 text-slate-900 shadow-sm font-extrabold'
-                  : 'text-slate-600 dark:text-[#A1A1AA] hover:text-slate-dark dark:hover:text-[#F5F5F5]'
-              }`}
-            >
-              <Star className={`w-3.5 h-3.5 ${filterMode === 'watchlist' ? 'fill-slate-900' : ''}`} />
-              <span>Your Watchlist News</span>
-              {watchlistTickers.size > 0 && (
-                <span className="ml-0.5 px-1.5 py-0.2 rounded-full bg-slate-900/10 dark:bg-black/30 text-[10px]">
-                  {watchlistTickers.size}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => setFilterMode('portfolio')}
-              className={`px-3.5 py-1 text-xs font-bold rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
-                filterMode === 'portfolio'
-                  ? 'bg-lime text-[#0F0B0A] shadow-sm font-extrabold'
-                  : 'text-slate-600 dark:text-[#A1A1AA] hover:text-slate-dark dark:hover:text-[#F5F5F5]'
-              }`}
-            >
-              <PieChart className="w-3.5 h-3.5" />
-              <span>Portfolio Holdings</span>
-              {portfolioTickers.size > 0 && (
-                <span className="ml-0.5 px-1.5 py-0.2 rounded-full bg-slate-900/10 dark:bg-black/30 text-[10px]">
-                  {portfolioTickers.size}
-                </span>
-              )}
-            </button>
+          <div className="overflow-x-auto no-scrollbar max-w-full pb-0.5">
+            <div className="flex items-center gap-1.5 bg-slate-100/80 dark:bg-[#1E1E21] p-1 rounded-full border border-slate-200 dark:border-[#3A3A3D] shrink-0">
+              <button
+                onClick={() => setFilterMode('all')}
+                className={`px-3 sm:px-3.5 py-1 text-xs font-bold rounded-full transition-all cursor-pointer whitespace-nowrap min-h-[30px] ${
+                  filterMode === 'all'
+                    ? 'bg-white dark:bg-[#28282B] text-slate-dark dark:text-[#F5F5F5] shadow-sm'
+                    : 'text-slate-500 dark:text-[#71717A] hover:text-slate-dark dark:hover:text-[#F5F5F5]'
+                }`}
+              >
+                All Stories
+              </button>
+              <button
+                onClick={() => setFilterMode('watchlist')}
+                className={`px-3 sm:px-3.5 py-1 text-xs font-bold rounded-full transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap min-h-[30px] ${
+                  filterMode === 'watchlist'
+                    ? 'bg-amber-400 text-slate-900 shadow-sm font-extrabold'
+                    : 'text-slate-600 dark:text-[#A1A1AA] hover:text-slate-dark dark:hover:text-[#F5F5F5]'
+                }`}
+              >
+                <Star className={`w-3.5 h-3.5 ${filterMode === 'watchlist' ? 'fill-slate-900' : ''}`} />
+                <span>Watchlist</span>
+                {watchlistTickers.size > 0 && (
+                  <span className="ml-0.5 px-1.5 py-0.2 rounded-full bg-slate-900/10 dark:bg-black/30 text-[10px]">
+                    {watchlistTickers.size}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => setFilterMode('portfolio')}
+                className={`px-3 sm:px-3.5 py-1 text-xs font-bold rounded-full transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap min-h-[30px] ${
+                  filterMode === 'portfolio'
+                    ? 'bg-lime text-[#0F0B0A] shadow-sm font-extrabold'
+                    : 'text-slate-600 dark:text-[#A1A1AA] hover:text-slate-dark dark:hover:text-[#F5F5F5]'
+                }`}
+              >
+                <PieChart className="w-3.5 h-3.5" />
+                <span>Portfolio</span>
+                {portfolioTickers.size > 0 && (
+                  <span className="ml-0.5 px-1.5 py-0.2 rounded-full bg-slate-900/10 dark:bg-black/30 text-[10px]">
+                    {portfolioTickers.size}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Search Bar */}
-          <div className="relative min-w-[240px]">
+          <div className="relative w-full sm:w-64">
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#71717A]" />
             <input
               type="text"

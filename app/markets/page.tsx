@@ -102,25 +102,27 @@ export default function MarketsPage() {
       </div>
 
       {/* 2. REGION SWITCHER BAR */}
-      <GlassCard className="p-3.5 flex flex-col gap-3">
+      <GlassCard className="p-3 sm:p-3.5 flex flex-col gap-3">
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 w-full sm:w-auto min-w-max">
-            {regions.map((reg) => (
-              <button
-                key={reg.id}
-                onClick={() => {
-                  setSelectedRegion(reg.id);
-                  setDisplayLimit(25);
-                }}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                  selectedRegion === reg.id
-                    ? 'bg-lime text-[#0F0B0A] shadow-sm'
-                    : 'bg-slate-100 dark:bg-[#1E1E21] text-slate-600 dark:text-[#A1A1AA] hover:bg-slate-200 dark:hover:bg-[#323236] dark:hover:text-[#F5F5F5]'
-                }`}
-              >
-                {reg.label}
-              </button>
-            ))}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 sm:pb-0 w-full sm:w-auto max-w-full">
+            <div className="flex items-center gap-1.5 shrink-0">
+              {regions.map((reg) => (
+                <button
+                  key={reg.id}
+                  onClick={() => {
+                    setSelectedRegion(reg.id);
+                    setDisplayLimit(25);
+                  }}
+                  className={`px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-bold transition-all min-h-[34px] cursor-pointer shrink-0 ${
+                    selectedRegion === reg.id
+                      ? 'bg-lime text-[#0F0B0A] shadow-sm'
+                      : 'bg-slate-100 dark:bg-[#1E1E21] text-slate-600 dark:text-[#A1A1AA] hover:bg-slate-200 dark:hover:bg-[#323236] dark:hover:text-[#F5F5F5]'
+                  }`}
+                >
+                  {reg.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Search Box */}
@@ -128,13 +130,13 @@ export default function MarketsPage() {
             <Search className="w-4 h-4 text-slate-400 dark:text-[#71717A] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search ticker, company, exchange, country..."
+              placeholder="Search ticker, company, exchange..."
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
                 setDisplayLimit(25);
               }}
-              className="w-full pl-9 pr-8 py-1.5 bg-white dark:bg-[#1E1E21] border border-slate-border dark:border-[#3A3A3D] rounded-xl text-xs text-slate-dark dark:text-[#F5F5F5] placeholder:text-slate-400 dark:placeholder:text-[#71717A] focus:outline-none focus:border-[#B8F500]/60 transition-all font-medium"
+              className="w-full pl-9 pr-8 py-2 sm:py-1.5 bg-white dark:bg-[#1E1E21] border border-slate-border dark:border-[#3A3A3D] rounded-xl text-xs text-slate-dark dark:text-[#F5F5F5] placeholder:text-slate-400 dark:placeholder:text-[#71717A] focus:outline-none focus:border-[#B8F500]/60 transition-all font-medium"
             />
             {searchQuery && (
               <button
@@ -152,7 +154,7 @@ export default function MarketsPage() {
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#71717A]">
             Sort by performance:
           </span>
-          <div className="overflow-x-auto pb-1 sm:pb-0">
+          <div className="overflow-x-auto no-scrollbar pb-1 sm:pb-0 max-w-full">
             <PillTabs
               items={filterTabs}
               activeId={activeFilter}
@@ -172,15 +174,15 @@ export default function MarketsPage() {
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-slate-50/90 dark:bg-[#1E1E21] border-b border-slate-border dark:border-[#3A3A3D] text-slate-muted dark:text-[#A1A1AA] uppercase text-[10px] font-bold tracking-wider select-none">
-                <th className="py-3.5 px-4 w-12 text-center">Watch</th>
-                <th className="py-3.5 px-4">Instrument</th>
-                <th className="py-3.5 px-4 text-right">Price</th>
-                <th className="py-3.5 px-4 text-right">24h Change</th>
-                <th className="py-3.5 px-4 text-right">24h %</th>
-                <th className="py-3.5 px-4 text-right hidden sm:table-cell">24h Volume</th>
-                <th className="py-3.5 px-4 text-right hidden md:table-cell">Market Cap</th>
-                <th className="py-3.5 px-4 text-right hidden lg:table-cell">52W Range</th>
-                <th className="py-3.5 px-4 text-center">Actions</th>
+                <th className="py-3 px-2 sm:px-4 w-10 sm:w-12 text-center">Watch</th>
+                <th className="py-3 px-2 sm:px-4">Instrument</th>
+                <th className="py-3 px-2 sm:px-4 text-right">Price</th>
+                <th className="py-3 px-2 sm:px-4 text-right hidden sm:table-cell">24h Change</th>
+                <th className="py-3 px-2 sm:px-4 text-right">24h %</th>
+                <th className="py-3 px-2 sm:px-4 text-right hidden sm:table-cell">24h Volume</th>
+                <th className="py-3 px-2 sm:px-4 text-right hidden md:table-cell">Market Cap</th>
+                <th className="py-3 px-2 sm:px-4 text-right hidden lg:table-cell">52W Range</th>
+                <th className="py-3 px-2 sm:px-4 text-center">Actions</th>
               </tr>
             </thead>
 
@@ -225,12 +227,12 @@ export default function MarketsPage() {
                   return (
                     <tr key={asset.id || ticker} className="hover:bg-slate-50/80 dark:hover:bg-[#323236] transition-colors group">
                       {/* Watchlist Star Button */}
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3 px-2 sm:px-4 text-center">
                         <button
                           type="button"
                           onClick={() => toggleWatchlist({ assetId: asset.id, ticker })}
                           disabled={isToggling}
-                          className={`p-1 rounded-md transition-colors cursor-pointer ${
+                          className={`p-1.5 rounded-md transition-colors cursor-pointer min-h-[32px] min-w-[32px] flex items-center justify-center mx-auto ${
                             isItemWatched ? 'text-amber-500 hover:text-amber-600' : 'text-slate-300 dark:text-[#71717A] hover:text-slate-500 dark:hover:text-[#F5F5F5]'
                           }`}
                           aria-label={isItemWatched ? `Remove ${ticker} from Watchlist` : `Add ${ticker} to Watchlist`}
@@ -241,17 +243,17 @@ export default function MarketsPage() {
                       </td>
 
                       {/* Instrument Symbol & Name */}
-                      <td className="py-3.5 px-4">
-                        <Link href={`/markets/${ticker}`} className="flex items-center gap-3">
-                          <CompanyLogo ticker={ticker} name={name} size="md" />
-                          <div>
-                            <div className="font-extrabold text-slate-dark dark:text-[#F5F5F5] text-sm group-hover:text-lime-900 dark:group-hover:text-lime transition-colors flex items-center gap-1.5">
-                              {ticker}
-                              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-slate-100 dark:bg-[#1E1E21] text-slate-600 dark:text-[#A1A1AA] border border-slate-200 dark:border-[#3A3A3D]">
+                      <td className="py-3 px-2 sm:px-4">
+                        <Link href={`/markets/${ticker}`} className="flex items-center gap-2 sm:gap-3">
+                          <CompanyLogo ticker={ticker} name={name} size="sm" />
+                          <div className="min-w-0">
+                            <div className="font-extrabold text-slate-dark dark:text-[#F5F5F5] text-xs sm:text-sm group-hover:text-lime-900 dark:group-hover:text-lime transition-colors flex items-center gap-1 sm:gap-1.5">
+                              <span>{ticker}</span>
+                              <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 rounded bg-slate-100 dark:bg-[#1E1E21] text-slate-600 dark:text-[#A1A1AA] border border-slate-200 dark:border-[#3A3A3D] hidden sm:inline">
                                 {asset.type || 'Stock'}
                               </span>
                             </div>
-                            <div className="text-[11px] text-slate-muted dark:text-[#71717A] truncate max-w-[160px] sm:max-w-[220px]">
+                            <div className="text-[10px] sm:text-[11px] text-slate-muted dark:text-[#71717A] truncate max-w-[90px] sm:max-w-[200px]">
                               {name}
                             </div>
                           </div>
@@ -259,19 +261,19 @@ export default function MarketsPage() {
                       </td>
 
                       {/* Current Price */}
-                      <td className="py-3.5 px-4 text-right font-mono font-bold text-slate-dark dark:text-[#F5F5F5]">
+                      <td className="py-3 px-2 sm:px-4 text-right font-mono font-bold text-slate-dark dark:text-[#F5F5F5] text-xs sm:text-sm">
                         {formatCurrency(price)}
                       </td>
 
                       {/* 24h Dollar Change */}
-                      <td className={`py-3.5 px-4 text-right font-mono font-bold ${
+                      <td className={`py-3 px-2 sm:px-4 text-right font-mono font-bold text-xs hidden sm:table-cell ${
                         isNeutral ? 'text-slate-500 dark:text-[#71717A]' : isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
                       }`}>
                         {isPositive && !isNeutral ? '+' : ''}{dayChange.toFixed(2)}
                       </td>
 
                       {/* 24h Percent Badge */}
-                      <td className="py-3.5 px-4 text-right">
+                      <td className="py-3 px-2 sm:px-4 text-right">
                         <div className="inline-flex justify-end">
                           <Badge variant={isNeutral ? 'neutral' : isPositive ? 'up' : 'down'} size="sm">
                             {isPositive && !isNeutral ? (
@@ -285,32 +287,32 @@ export default function MarketsPage() {
                       </td>
 
                       {/* 24h Volume */}
-                      <td className="py-3.5 px-4 text-right font-mono text-slate-600 dark:text-[#A1A1AA] hidden sm:table-cell">
+                      <td className="py-3 px-2 sm:px-4 text-right font-mono text-slate-600 dark:text-[#A1A1AA] hidden sm:table-cell">
                         {asset.volume_24h || 'N/A'}
                       </td>
 
                       {/* Market Cap */}
-                      <td className="py-3.5 px-4 text-right font-mono text-slate-600 dark:text-[#A1A1AA] hidden md:table-cell">
+                      <td className="py-3 px-2 sm:px-4 text-right font-mono text-slate-600 dark:text-[#A1A1AA] hidden md:table-cell">
                         {asset.market_cap || 'N/A'}
                       </td>
 
                       {/* 52W Range Indicator */}
-                      <td className="py-3.5 px-4 text-right font-mono text-slate-500 dark:text-[#71717A] text-[11px] hidden lg:table-cell">
+                      <td className="py-3 px-2 sm:px-4 text-right font-mono text-slate-500 dark:text-[#71717A] text-[11px] hidden lg:table-cell">
                         {asset.low_52w && asset.high_52w
                           ? `$${asset.low_52w.toFixed(0)} - $${asset.high_52w.toFixed(0)}`
                           : 'N/A'}
                       </td>
 
                       {/* Actions */}
-                      <td className="py-3.5 px-4 text-center">
-                        <div className="flex items-center justify-center gap-1.5">
+                      <td className="py-3 px-2 sm:px-4 text-center">
+                        <div className="flex items-center justify-center gap-1 sm:gap-1.5">
                           <Link href={`/trade?ticker=${ticker}&type=BUY`}>
-                            <button className="px-2.5 py-1 rounded-lg bg-lime text-[#0F0B0A] text-[11px] font-extrabold hover:bg-lime-300 transition-colors cursor-pointer">
+                            <button className="px-2 sm:px-2.5 py-1 rounded-lg bg-lime text-[#0F0B0A] text-[10px] sm:text-[11px] font-extrabold hover:bg-lime-300 transition-colors cursor-pointer min-h-[30px]">
                               Buy
                             </button>
                           </Link>
-                          <Link href={`/markets/${ticker}`}>
-                            <button className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-[#1E1E21] text-slate-700 dark:text-[#F5F5F5] text-[11px] font-bold hover:bg-slate-200 dark:hover:bg-[#323236] border border-slate-200 dark:border-[#3A3A3D] transition-colors cursor-pointer">
+                          <Link href={`/markets/${ticker}`} className="hidden sm:inline-block">
+                            <button className="px-2 sm:px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-[#1E1E21] text-slate-700 dark:text-[#F5F5F5] text-[10px] sm:text-[11px] font-bold hover:bg-slate-200 dark:hover:bg-[#323236] border border-slate-200 dark:border-[#3A3A3D] transition-colors cursor-pointer min-h-[30px]">
                               Quote
                             </button>
                           </Link>

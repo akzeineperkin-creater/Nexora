@@ -647,24 +647,26 @@ export default function GameDetailPage() {
             </div>
 
             {/* Quick stock chips */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-              {filteredStocks.map((s) => (
-                <button
-                  key={s.ticker}
-                  onClick={() => {
-                    setSelectedTicker(s.ticker);
-                    setSearchQuery('');
-                  }}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
-                    selectedTicker.toUpperCase() === s.ticker.toUpperCase()
-                      ? 'bg-lime text-[#0F0B0A] shadow-sm'
-                      : 'bg-slate-100 dark:bg-[#1E1E21] hover:bg-slate-200 dark:hover:bg-[#323236] text-slate-700 dark:text-[#F5F5F5]'
-                  }`}
-                >
-                  <span>{s.ticker}</span>
-                  <span className="font-mono text-[10px] opacity-75">${Number(s.current_price).toFixed(2)}</span>
-                </button>
-              ))}
+            <div className="overflow-x-auto no-scrollbar max-w-full pb-1">
+              <div className="flex items-center gap-1.5 shrink-0">
+                {filteredStocks.map((s) => (
+                  <button
+                    key={s.ticker}
+                    onClick={() => {
+                      setSelectedTicker(s.ticker);
+                      setSearchQuery('');
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all min-h-[32px] cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                      selectedTicker.toUpperCase() === s.ticker.toUpperCase()
+                        ? 'bg-lime text-[#0F0B0A] shadow-sm'
+                        : 'bg-slate-100 dark:bg-[#1E1E21] hover:bg-slate-200 dark:hover:bg-[#323236] text-slate-700 dark:text-[#F5F5F5]'
+                    }`}
+                  >
+                    <span>{s.ticker}</span>
+                    <span className="font-mono text-[10px] opacity-75">${Number(s.current_price).toFixed(2)}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </Card>
 
@@ -904,11 +906,11 @@ export default function GameDetailPage() {
                   <table className="w-full text-left text-xs">
                     <thead>
                       <tr className="bg-slate-50 dark:bg-[#1E1E21] border-b border-slate-border dark:border-[#3A3A3D] text-slate-muted dark:text-[#A1A1AA] uppercase text-[10px] font-bold select-none">
-                        <th className="py-2.5 px-4">Instrument</th>
-                        <th className="py-2.5 px-4">Shares</th>
-                        <th className="py-2.5 px-4">Avg Cost</th>
-                        <th className="py-2.5 px-4">Market Value</th>
-                        <th className="py-2.5 px-4 text-right">P&L</th>
+                        <th className="py-2.5 px-2.5 sm:px-4">Instrument</th>
+                        <th className="py-2.5 px-2.5 sm:px-4">Shares</th>
+                        <th className="py-2.5 px-2.5 sm:px-4 hidden sm:table-cell">Avg Cost</th>
+                        <th className="py-2.5 px-2.5 sm:px-4">Market Value</th>
+                        <th className="py-2.5 px-2.5 sm:px-4 text-right">P&L</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-[#3A3A3D] font-mono">
@@ -918,16 +920,16 @@ export default function GameDetailPage() {
                           onClick={() => setSelectedTicker(h.ticker)}
                           className="hover:bg-slate-50 dark:hover:bg-[#323236] cursor-pointer transition-colors"
                         >
-                          <td className="py-3 px-4">
+                          <td className="py-3 px-2.5 sm:px-4">
                             <span className="font-extrabold text-slate-dark dark:text-[#F5F5F5]">{h.ticker}</span>
-                            <span className="text-[10px] text-slate-400 dark:text-[#71717A] block truncate max-w-[120px]">{h.name}</span>
+                            <span className="text-[10px] text-slate-400 dark:text-[#71717A] block truncate max-w-[90px] sm:max-w-[120px]">{h.name}</span>
                           </td>
-                          <td className="py-3 px-4 font-bold text-slate-dark dark:text-[#F5F5F5]">{h.shares}</td>
-                          <td className="py-3 px-4 text-slate-600 dark:text-[#A1A1AA]">{formatCurrency(h.avgCost)}</td>
-                          <td className="py-3 px-4 font-bold text-slate-dark dark:text-[#F5F5F5]">{formatCurrency(h.currentValue)}</td>
-                          <td className="py-3 px-4 text-right">
+                          <td className="py-3 px-2.5 sm:px-4 font-bold text-slate-dark dark:text-[#F5F5F5] text-xs">{h.shares}</td>
+                          <td className="py-3 px-2.5 sm:px-4 text-slate-600 dark:text-[#A1A1AA] hidden sm:table-cell">{formatCurrency(h.avgCost)}</td>
+                          <td className="py-3 px-2.5 sm:px-4 font-bold text-slate-dark dark:text-[#F5F5F5] text-xs sm:text-sm">{formatCurrency(h.currentValue)}</td>
+                          <td className="py-3 px-2.5 sm:px-4 text-right">
                             <span className={h.unrealizedPnl >= 0 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-red-600 dark:text-red-400 font-bold'}>
-                              {h.unrealizedPnl >= 0 ? '+' : ''}{formatCurrency(h.unrealizedPnl)} ({h.returnPct}%)
+                              {h.unrealizedPnl >= 0 ? '+' : ''}{formatCurrency(h.unrealizedPnl)} <span className="hidden sm:inline">({h.returnPct}%)</span>
                             </span>
                           </td>
                         </tr>
@@ -962,17 +964,17 @@ export default function GameDetailPage() {
                   <table className="w-full text-left text-xs font-mono">
                     <thead>
                       <tr className="bg-slate-50 dark:bg-[#1E1E21] border-b border-slate-border dark:border-[#3A3A3D] text-slate-muted dark:text-[#A1A1AA] uppercase text-[10px] font-bold select-none">
-                        <th className="py-2.5 px-4">Type</th>
-                        <th className="py-2.5 px-4">Ticker</th>
-                        <th className="py-2.5 px-4">Shares</th>
-                        <th className="py-2.5 px-4">Execution Price</th>
-                        <th className="py-2.5 px-4 text-right">Total</th>
+                        <th className="py-2.5 px-2.5 sm:px-4">Type</th>
+                        <th className="py-2.5 px-2.5 sm:px-4">Ticker</th>
+                        <th className="py-2.5 px-2.5 sm:px-4">Shares</th>
+                        <th className="py-2.5 px-2.5 sm:px-4 hidden sm:table-cell">Execution Price</th>
+                        <th className="py-2.5 px-2.5 sm:px-4 text-right">Total</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-[#3A3A3D]">
                       {portfolio.transactions.slice(0, 5).map((tx) => (
                         <tr key={tx.id} className="hover:bg-slate-50 dark:hover:bg-[#323236]">
-                          <td className="py-2.5 px-4">
+                          <td className="py-2.5 px-2.5 sm:px-4">
                             <span
                               className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
                                 tx.type === 'BUY'
@@ -983,10 +985,10 @@ export default function GameDetailPage() {
                               {tx.type}
                             </span>
                           </td>
-                          <td className="py-2.5 px-4 font-bold text-slate-dark dark:text-[#F5F5F5]">{tx.ticker}</td>
-                          <td className="py-2.5 px-4 text-slate-dark dark:text-[#F5F5F5]">{tx.shares}</td>
-                          <td className="py-2.5 px-4 text-slate-600 dark:text-[#A1A1AA]">{formatCurrency(tx.price)}</td>
-                          <td className="py-2.5 px-4 text-right font-bold text-slate-dark dark:text-[#F5F5F5]">{formatCurrency(tx.totalValue)}</td>
+                          <td className="py-2.5 px-2.5 sm:px-4 font-bold text-slate-dark dark:text-[#F5F5F5]">{tx.ticker}</td>
+                          <td className="py-2.5 px-2.5 sm:px-4 text-slate-dark dark:text-[#F5F5F5]">{tx.shares}</td>
+                          <td className="py-2.5 px-2.5 sm:px-4 text-slate-600 dark:text-[#A1A1AA] hidden sm:table-cell">{formatCurrency(tx.price)}</td>
+                          <td className="py-2.5 px-2.5 sm:px-4 text-right font-bold text-slate-dark dark:text-[#F5F5F5] text-xs sm:text-sm">{formatCurrency(tx.totalValue)}</td>
                         </tr>
                       ))}
                     </tbody>

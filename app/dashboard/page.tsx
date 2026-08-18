@@ -219,12 +219,12 @@ export default function DashboardPage() {
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="bg-slate-50/80 dark:bg-[#1E1E21] border-b border-slate-border dark:border-[#3A3A3D] text-slate-muted dark:text-[#A1A1AA] uppercase text-[11px] font-bold tracking-wider select-none">
-                    <th className="py-3 px-4">Asset</th>
-                    <th className="py-3 px-4">Shares</th>
-                    <th className="py-3 px-4">Price</th>
-                    <th className="py-3 px-4">Market Value</th>
-                    <th className="py-3 px-4">Unrealized P&L</th>
-                    <th className="py-3 px-4 text-right">Action</th>
+                    <th className="py-3 px-3 sm:px-4">Asset</th>
+                    <th className="py-3 px-3 sm:px-4 hidden sm:table-cell">Shares</th>
+                    <th className="py-3 px-3 sm:px-4">Price</th>
+                    <th className="py-3 px-3 sm:px-4 hidden md:table-cell">Market Value</th>
+                    <th className="py-3 px-3 sm:px-4">Unrealized P&L</th>
+                    <th className="py-3 px-3 sm:px-4 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-[#3A3A3D]">
@@ -239,24 +239,24 @@ export default function DashboardPage() {
                       const name = h.asset?.name || h.name || '';
                       return (
                         <tr key={h.id} className="hover:bg-slate-50/80 dark:hover:bg-[#323236] transition-colors">
-                          <td className="py-3.5 px-4">
-                            <Link href={`/markets/${ticker}`} className="flex items-center gap-3">
+                          <td className="py-3.5 px-3 sm:px-4">
+                            <Link href={`/markets/${ticker}`} className="flex items-center gap-2 sm:gap-3">
                               <CompanyLogo ticker={ticker} name={name} size="sm" />
                               <div>
                                 <div className="font-extrabold text-slate-dark dark:text-[#F5F5F5]">{ticker}</div>
-                                <div className="text-[11px] text-slate-muted dark:text-[#71717A]">{name}</div>
+                                <div className="text-[11px] text-slate-muted dark:text-[#71717A] truncate max-w-[100px] sm:max-w-[140px]">{name}</div>
                               </div>
                             </Link>
                           </td>
-                          <td className="py-3.5 px-4 font-mono font-semibold text-slate-dark dark:text-[#F5F5F5]">{h.shares}</td>
-                          <td className="py-3.5 px-4 font-mono text-slate-dark dark:text-[#F5F5F5]">{formatCurrency(h.currentPrice)}</td>
-                          <td className="py-3.5 px-4 font-mono font-bold text-slate-dark dark:text-[#F5F5F5]">{formatCurrency(h.marketValue)}</td>
-                          <td className="py-3.5 px-4">
+                          <td className="py-3.5 px-3 sm:px-4 font-mono font-semibold text-slate-dark dark:text-[#F5F5F5] hidden sm:table-cell">{h.shares}</td>
+                          <td className="py-3.5 px-3 sm:px-4 font-mono text-slate-dark dark:text-[#F5F5F5]">{formatCurrency(h.currentPrice)}</td>
+                          <td className="py-3.5 px-3 sm:px-4 font-mono font-bold text-slate-dark dark:text-[#F5F5F5] hidden md:table-cell">{formatCurrency(h.marketValue)}</td>
+                          <td className="py-3.5 px-3 sm:px-4">
                             <Badge variant={h.isPositive ? 'up' : 'down'} size="sm">
-                              {h.isPositive ? '+' : ''}{formatCurrency(h.unrealizedPnl)} ({formatPercent(h.unrealizedPnlPct)})
+                              {h.isPositive ? '+' : ''}{formatCurrency(h.unrealizedPnl)} <span className="hidden sm:inline">({formatPercent(h.unrealizedPnlPct)})</span>
                             </Badge>
                           </td>
-                          <td className="py-3.5 px-4 text-right">
+                          <td className="py-3.5 px-3 sm:px-4 text-right">
                             <Link href={`/trade?ticker=${ticker}`}>
                               <GlassButton variant="glass-dark" size="xs">Trade</GlassButton>
                             </Link>
@@ -266,7 +266,7 @@ export default function DashboardPage() {
                     })
                   ) : (
                     <tr>
-                      <td colSpan={6} className="text-center py-10 text-slate-muted dark:text-[#71717A]">
+                      <td colSpan={6} className="text-center py-10 px-4 text-slate-muted dark:text-[#71717A]">
                         <div className="flex flex-col items-center gap-2">
                           <Layers className="w-8 h-8 text-slate-300 dark:text-[#3A3A3D]" />
                           <span className="font-semibold text-xs text-slate-600 dark:text-[#A1A1AA]">No open positions yet.</span>
@@ -302,41 +302,41 @@ export default function DashboardPage() {
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="bg-slate-50/80 dark:bg-[#1E1E21] border-b border-slate-border dark:border-[#3A3A3D] text-slate-muted dark:text-[#A1A1AA] uppercase text-[11px] font-bold tracking-wider">
-                    <th className="py-3 px-4">Order ID</th>
-                    <th className="py-3 px-4">Instrument</th>
-                    <th className="py-3 px-4">Side</th>
-                    <th className="py-3 px-4">Quantity</th>
-                    <th className="py-3 px-4">Price</th>
-                    <th className="py-3 px-4">Total Amount</th>
-                    <th className="py-3 px-4 text-right">Date</th>
+                    <th className="py-3 px-3 sm:px-4 hidden md:table-cell">Order ID</th>
+                    <th className="py-3 px-3 sm:px-4">Instrument</th>
+                    <th className="py-3 px-3 sm:px-4">Side</th>
+                    <th className="py-3 px-3 sm:px-4 hidden sm:table-cell">Quantity</th>
+                    <th className="py-3 px-3 sm:px-4 hidden md:table-cell">Price</th>
+                    <th className="py-3 px-3 sm:px-4">Total Amount</th>
+                    <th className="py-3 px-3 sm:px-4 text-right">Date</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-[#3A3A3D]">
                   {transactions.length > 0 ? (
                     transactions.slice(0, 4).map((tx) => (
                       <tr key={tx.id} className="hover:bg-slate-50/80 dark:hover:bg-[#323236] transition-colors">
-                        <td className="py-3 px-4 font-mono text-slate-400 dark:text-[#71717A] text-[11px]">
+                        <td className="py-3 px-3 sm:px-4 font-mono text-slate-400 dark:text-[#71717A] text-[11px] hidden md:table-cell">
                           {tx.id.slice(0, 8)}...
                         </td>
-                        <td className="py-3 px-4 font-extrabold text-slate-dark dark:text-[#F5F5F5]">
+                        <td className="py-3 px-3 sm:px-4 font-extrabold text-slate-dark dark:text-[#F5F5F5]">
                           {tx.asset?.ticker || 'ASSET'}
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-3 sm:px-4">
                           <Badge variant={tx.type === 'BUY' ? 'lime' : 'down'} size="sm">
                             {tx.type}
                           </Badge>
                         </td>
-                        <td className="py-3 px-4 font-mono font-semibold text-slate-dark dark:text-[#F5F5F5]">{tx.shares}</td>
-                        <td className="py-3 px-4 font-mono text-slate-dark dark:text-[#F5F5F5]">{formatCurrency(tx.price_per_share)}</td>
-                        <td className="py-3 px-4 font-mono font-bold text-slate-dark dark:text-[#F5F5F5]">{formatCurrency(tx.total_amount)}</td>
-                        <td className="py-3 px-4 text-right font-mono text-slate-muted dark:text-[#71717A] text-[11px]">
+                        <td className="py-3 px-3 sm:px-4 font-mono font-semibold text-slate-dark dark:text-[#F5F5F5] hidden sm:table-cell">{tx.shares}</td>
+                        <td className="py-3 px-3 sm:px-4 font-mono text-slate-dark dark:text-[#F5F5F5] hidden md:table-cell">{formatCurrency(tx.price_per_share)}</td>
+                        <td className="py-3 px-3 sm:px-4 font-mono font-bold text-slate-dark dark:text-[#F5F5F5]">{formatCurrency(tx.total_amount)}</td>
+                        <td className="py-3 px-3 sm:px-4 text-right font-mono text-slate-muted dark:text-[#71717A] text-[11px] whitespace-nowrap">
                           {formatDate(tx.created_at)}
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={7} className="text-center py-6 text-slate-muted dark:text-[#71717A] text-xs">
+                      <td colSpan={7} className="text-center py-6 px-4 text-slate-muted dark:text-[#71717A] text-xs">
                         No transactions recorded yet.
                       </td>
                     </tr>

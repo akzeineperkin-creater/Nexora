@@ -75,17 +75,21 @@ export default function AcademyPage() {
             </p>
           </div>
 
-          <PillTabs
-            tabs={[
-              { id: 'All', label: 'All Levels (15)' },
-              { id: 'Beginner', label: 'Beginner (1–5)' },
-              { id: 'Intermediate', label: 'Intermediate (6–11)' },
-              { id: 'Advanced', label: 'Advanced (12–14)' },
-              { id: 'Master', label: 'Capstone (15)' },
-            ]}
-            activeId={categoryFilter}
-            onChange={(tabId) => setCategoryFilter(tabId as any)}
-          />
+          <div className="overflow-x-auto no-scrollbar max-w-full pb-0.5">
+            <div className="shrink-0">
+              <PillTabs
+                tabs={[
+                  { id: 'All', label: 'All Levels (15)' },
+                  { id: 'Beginner', label: 'Beginner (1–5)' },
+                  { id: 'Intermediate', label: 'Intermediate (6–11)' },
+                  { id: 'Advanced', label: 'Advanced (12–14)' },
+                  { id: 'Master', label: 'Capstone (15)' },
+                ]}
+                activeId={categoryFilter}
+                onChange={(tabId) => setCategoryFilter(tabId as any)}
+              />
+            </div>
+          </div>
         </div>
 
         {/* 15 Level Cards Grid */}
