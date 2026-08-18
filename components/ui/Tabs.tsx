@@ -23,7 +23,7 @@ export function PillTabs({ items, tabs, activeId, onChange, variant = 'lime', cl
   return (
     <div
       className={cn(
-        'inline-flex items-center bg-slate-100 dark:bg-[#0F0B0A] p-1 rounded-full border border-slate-border dark:border-[#3A3A3D] gap-1',
+        'inline-flex items-center bg-slate-100/90 dark:bg-[#1E1E21] p-1 rounded-full border border-slate-200 dark:border-[#3A3A3D] shadow-sm dark:shadow-dark-card gap-1 transition-colors',
         className
       )}
     >
@@ -32,19 +32,20 @@ export function PillTabs({ items, tabs, activeId, onChange, variant = 'lime', cl
         return (
           <button
             key={tab.id}
+            type="button"
             onClick={() => onChange(tab.id)}
             className={cn(
-              'px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-150 whitespace-nowrap cursor-pointer',
+              'px-3.5 py-1.5 rounded-full text-xs transition-all duration-150 whitespace-nowrap cursor-pointer select-none',
               isActive
                 ? variant === 'lime'
-                  ? 'bg-lime text-[#0F0B0A] font-extrabold shadow-lime-subtle'
+                  ? 'bg-lime text-[#0F0B0A] font-extrabold shadow-lime scale-[1.02]'
                   : 'bg-white dark:bg-[#28282B] text-slate-dark dark:text-[#F5F5F5] font-bold shadow-subtle border border-slate-200 dark:border-[#3A3A3D]'
-                : 'text-slate-600 dark:text-[#A1A1AA] hover:text-slate-dark dark:hover:text-[#F5F5F5] hover:bg-slate-200/50 dark:hover:bg-[#28282B]'
+                : 'text-slate-600 dark:text-zinc-300 font-semibold hover:text-slate-950 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-[#28282B]'
             )}
           >
             <span>{tab.label}</span>
             {tab.count !== undefined && (
-              <span className="ml-1.5 text-[10px] opacity-75 font-mono">({tab.count})</span>
+              <span className="ml-1.5 text-[10px] opacity-80 font-mono font-bold">({tab.count})</span>
             )}
           </button>
         );
