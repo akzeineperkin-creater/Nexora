@@ -250,7 +250,7 @@ export function CreateGameModal({ isOpen, onClose }: CreateGameModalProps) {
 
               <div className="col-span-1 sm:col-span-2 text-[11px] text-slate-500 dark:text-[#71717A] flex items-center justify-between border-t border-slate-200 dark:border-[#3A3A3D] pt-2">
                 <span>Timezone: <strong>US Eastern Time (EDT/EST, GMT-4)</strong></span>
-                <span className="font-semibold text-amber-600 dark:text-amber-400">🔒 Trading unlocks at exact start time</span>
+                <span className="font-semibold text-amber-600 dark:text-amber-400"> Trading unlocks at exact start time</span>
               </div>
             </div>
 
@@ -441,13 +441,13 @@ export function CreateGameModal({ isOpen, onClose }: CreateGameModalProps) {
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 text-center text-[11px]">
                 <div className="p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 font-bold text-amber-700 dark:text-amber-300">
-                  🥇 1st: +500 XP
+                   1st: +500 XP
                 </div>
                 <div className="p-1.5 rounded-lg bg-slate-400/10 border border-slate-400/20 font-bold text-slate-700 dark:text-slate-300">
-                  🥈 2nd: +350 XP
+                   2nd: +350 XP
                 </div>
                 <div className="p-1.5 rounded-lg bg-amber-700/10 border border-amber-700/20 font-bold text-amber-800 dark:text-amber-400">
-                  🥉 3rd: +250 XP
+                   3rd: +250 XP
                 </div>
                 <div className="p-1.5 rounded-lg bg-lime-500/10 border border-lime-500/20 font-bold text-lime-800 dark:text-lime">
                   Top 10: +100 XP
