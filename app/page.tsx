@@ -1,8 +1,7 @@
 'use client';
 
 import React from 'react';
-import { LandingNavbar } from '@/components/landing/LandingNavbar';
-import { MarketHero } from '@/components/landing/MarketHero';
+import { NexraHero } from '@/components/ui/prisma-hero';
 import { TickerMarquee } from '@/components/landing/TickerMarquee';
 import { LandingSimulatorDemo } from '@/components/landing/LandingSimulatorDemo';
 import { LandingHowItWorks } from '@/components/landing/LandingHowItWorks';
@@ -13,30 +12,27 @@ import { LandingFooter } from '@/components/landing/LandingFooter';
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#050807] text-[#F5F5F5] selection:bg-lime/30 selection:text-white antialiased overflow-x-hidden flex flex-col justify-between">
-      {/* 1. Transparent Glass Navbar */}
-      <LandingNavbar />
-
-      {/* 2. Main Full-Screen Hero with Dynamic Stock Market Canvas Animation */}
+      {/* 1. Cinematic Nexra Hero (Redesigned with Prisma-style visual foundation, video background, and massive typography) */}
       <main className="flex-1 w-full">
-        <MarketHero />
+        <NexraHero />
 
-        {/* 3. Live Equities Ticker Marquee Ribbon */}
+        {/* 2. Live Equities Ticker Ribbon */}
         <TickerMarquee />
 
-        {/* 4. Interactive Simulator Preview Terminal */}
+        {/* 3. Interactive Simulator Preview Terminal */}
         <LandingSimulatorDemo />
 
-        {/* 5. How It Works (3-Step Roadmap) */}
+        {/* 4. How It Works (3-Step Roadmap) */}
         <LandingHowItWorks />
 
-        {/* 6. Feature Toolkit & Capabilities */}
+        {/* 5. Feature Toolkit & Capabilities */}
         <LandingFeatures />
 
-        {/* 7. Conversion CTA Banner */}
+        {/* 6. Conversion CTA Banner */}
         <LandingCTA />
       </main>
 
-      {/* 8. Minimalist Footer */}
+      {/* 7. Minimalist Footer */}
       <LandingFooter />
     </div>
   );
