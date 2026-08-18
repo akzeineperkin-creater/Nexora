@@ -2,6 +2,18 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function updateSession(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  // 1. Never intercept Next.js internal chunks, static assets, APIs, or files with extensions
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api') ||
+    pathname === '/favicon.ico' ||
+    pathname.match(/\.(svg|png|jpg|jpeg|gif|webp|ico|css|js|map|woff|woff2|ttf|eot)$/)
+  ) {
+    return NextResponse.next();
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   });
@@ -47,19 +59,10 @@ export async function updateSession(request: NextRequest) {
     user = null;
   }
 
-  const pathname = request.nextUrl.pathname;
-
   const isPublicPath =
     pathname === '/' ||
     pathname === '/register' ||
-    pathname === '/login' ||
-    pathname.startsWith('/api/') ||
-    pathname.startsWith('/_next') ||
-    pathname === '/favicon.ico' ||
-    pathname.endsWith('.png') ||
-    pathname.endsWith('.jpg') ||
-    pathname.endsWith('.svg') ||
-    pathname.endsWith('.ico');
+    pathname === '/login';
 
   // If user is unauthenticated and tries to access a protected route, redirect to /register
   if (!user && !isPublicPath) {
