@@ -50,6 +50,7 @@ export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   const isPublicPath =
+    pathname === '/' ||
     pathname === '/register' ||
     pathname === '/login' ||
     pathname.startsWith('/api/') ||
@@ -71,8 +72,9 @@ export async function updateSession(request: NextRequest) {
     return redirectResponse;
   }
 
-  // If user is logged in and visits /login, /register, or root /, redirect to /dashboard
-  if (user && (pathname === '/login' || pathname === '/register' || pathname === '/')) {
+  // If user is logged in and visits /login or /register, redirect to /dashboard
+  // (Root path '/' remains accessible to all visitors as the public landing page)
+  if (user && (pathname === '/login' || pathname === '/register')) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = '/dashboard';
     const redirectResponse = NextResponse.redirect(redirectUrl);

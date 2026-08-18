@@ -77,10 +77,13 @@ export function MarketHeroCanvas() {
     const handleResize = () => {
       if (!canvas) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      width = canvas.width = window.innerWidth * dpr;
-      height = canvas.height = window.innerHeight * dpr;
-      canvas.style.width = `${window.innerWidth}px`;
-      canvas.style.height = `${window.innerHeight}px`;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      width = canvas.width = w * dpr;
+      height = canvas.height = h * dpr;
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+      ctx.resetTransform?.();
       ctx.scale(dpr, dpr);
       initElements();
     };
