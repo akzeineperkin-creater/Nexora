@@ -30,6 +30,7 @@ export default function GamesHubPage() {
   const allGames = data?.games || [];
   const activeGames = allGames.filter((g) => g.status === 'active');
   const featuredGame = activeGames[0] || allGames[0];
+  const totalParticipants = allGames.reduce((sum, g) => sum + (g.participantsCount || 0), 0);
 
   return (
     <div className="flex flex-col gap-8 max-w-[1440px] mx-auto">
@@ -148,7 +149,7 @@ export default function GamesHubPage() {
             <span className="font-bold">Total Sim Traders</span>
           </div>
           <div className="text-xl font-extrabold font-mono text-slate-dark dark:text-[#F5F5F5]">
-            2,950+
+            {totalParticipants.toLocaleString()}
           </div>
         </Card>
 

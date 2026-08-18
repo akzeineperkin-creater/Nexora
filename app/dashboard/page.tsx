@@ -31,14 +31,18 @@ import { CompanyLogo } from '@/components/market/CompanyLogo';
 import { usePortfolio } from '@/hooks/usePortfolio';
 import { useAssets } from '@/hooks/useAssets';
 import { useWatchlist } from '@/hooks/useWatchlist';
+import { useGames } from '@/hooks/useGames';
 import { useAuth } from '@/providers/AuthProvider';
 import { formatCurrency, formatPercent, formatDate } from '@/lib/utils';
+import { getCountdownString } from '@/lib/games/games-service';
 
 export default function DashboardPage() {
   const { user, profile } = useAuth();
   const { data: portfolio, isLoading: isPortfolioLoading } = usePortfolio();
   const { data: assets, isLoading: isAssetsLoading } = useAssets();
   const { data: watchlist, isLoading: isWatchlistLoading } = useWatchlist();
+  const { data: gamesData } = useGames('active');
+  const activeTournament = gamesData?.games?.[0];
 
   const totalValue = portfolio?.totalPortfolioValue ?? 10000.00;
   const totalPnl = portfolio?.totalPnl ?? 0;
@@ -348,33 +352,41 @@ export default function DashboardPage() {
           {/* TOURNAMENT HERO CARD */}
           <div className="bg-gradient-to-br from-[#1E1E21] via-[#28282B] to-[#1E1E21] border border-[#3A3A3D] text-white rounded-card-lg p-5 relative overflow-hidden shadow-dark-card">
             <div className="absolute top-0 right-0 w-32 h-32 bg-lime/10 rounded-full blur-2xl pointer-events-none" />
-            <Badge variant="lime" size="sm" className="mb-3">Tournament</Badge>
-            <h3 className="text-lg font-extrabold text-white leading-snug">Alpha Trader Summer Cup</h3>
+            <Badge variant="lime" size="sm" className="mb-3">Live Arena</Badge>
+            <h3 className="text-lg font-extrabold text-white leading-snug">
+              {activeTournament ? activeTournament.title : 'Simulated Trading Tournaments'}
+            </h3>
             <p className="text-xs text-zinc-300 dark:text-[#A1A1AA] mt-1">
-              All 2,840 participants started with equal $10,000.00 capital.
+              {activeTournament
+                ? `Starting balance: $${activeTournament.startingCapital.toLocaleString()} • Equal capital competition.`
+                : 'Compete in simulated equity trading tournaments with equal starting virtual cash.'}
             </p>
 
             <div className="flex items-center justify-between my-4 py-3 border-y border-white/10 dark:border-[#3A3A3D] font-mono text-xs">
               <div>
-                <div className="text-[10px] text-zinc-400 dark:text-[#71717A] uppercase">Your Rank</div>
-                <div className="text-base font-extrabold text-lime mt-0.5">#14</div>
-              </div>
-              <div>
-                <div className="text-[10px] text-zinc-400 dark:text-[#71717A] uppercase">Total Return</div>
+                <div className="text-[10px] text-zinc-400 dark:text-[#71717A] uppercase">Portfolio Return</div>
                 <div className="text-base font-extrabold text-lime mt-0.5">
                   {totalReturnPct >= 0 ? '+' : ''}{totalReturnPct.toFixed(2)}%
                 </div>
               </div>
               <div>
-                <div className="text-[10px] text-zinc-400 dark:text-[#71717A] uppercase">Time Left</div>
-                <div className="text-base font-extrabold text-white mt-0.5">14 Days</div>
+                <div className="text-[10px] text-zinc-400 dark:text-[#71717A] uppercase">Cash Balance</div>
+                <div className="text-base font-extrabold text-white mt-0.5">
+                  {formatCurrency(cashBalance, 0)}
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] text-zinc-400 dark:text-[#71717A] uppercase">Status</div>
+                <div className="text-base font-extrabold text-lime mt-0.5">
+                  {activeTournament ? getCountdownString(activeTournament.endDate, false) : 'Live'}
+                </div>
               </div>
             </div>
 
-            <Link href="/leaderboard" className="w-full block">
+            <Link href={activeTournament ? `/games/${activeTournament.slug}` : '/games'} className="w-full block">
               <GlassButton variant="lime" size="sm" fullWidth>
                 <Trophy className="w-3.5 h-3.5" />
-                <span>View Full Leaderboard</span>
+                <span>{activeTournament ? 'Enter Championship Arena' : 'Explore Tournaments'}</span>
               </GlassButton>
             </Link>
           </div>

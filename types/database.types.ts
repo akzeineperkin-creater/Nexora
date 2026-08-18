@@ -246,35 +246,32 @@ export interface Database {
       challenges: {
         Row: {
           id: string;
-          title: string;
+          name: string;
           description: string;
           starting_capital: number;
           start_date: string;
           end_date: string;
-          prize_pool: string;
-          status: 'UPCOMING' | 'ACTIVE' | 'COMPLETED';
+          status: 'UPCOMING' | 'ACTIVE' | 'COMPLETED' | string;
           created_at: string;
         };
         Insert: {
           id?: string;
-          title: string;
-          description: string;
+          name: string;
+          description?: string;
           starting_capital?: number;
           start_date: string;
           end_date: string;
-          prize_pool?: string;
-          status?: 'UPCOMING' | 'ACTIVE' | 'COMPLETED';
+          status?: 'UPCOMING' | 'ACTIVE' | 'COMPLETED' | string;
           created_at?: string;
         };
         Update: {
           id?: string;
-          title?: string;
+          name?: string;
           description?: string;
           starting_capital?: number;
           start_date?: string;
           end_date?: string;
-          prize_pool?: string;
-          status?: 'UPCOMING' | 'ACTIVE' | 'COMPLETED';
+          status?: 'UPCOMING' | 'ACTIVE' | 'COMPLETED' | string;
           created_at?: string;
         };
       };
@@ -283,28 +280,31 @@ export interface Database {
           id: string;
           challenge_id: string;
           user_id: string;
-          portfolio_id: string;
           rank: number;
-          return_pct: number;
-          created_at: string;
+          pnl: number;
+          starting_capital: number;
+          current_value: number;
+          joined_at: string;
         };
         Insert: {
           id?: string;
           challenge_id: string;
           user_id: string;
-          portfolio_id: string;
           rank?: number;
-          return_pct?: number;
-          created_at?: string;
+          pnl?: number;
+          starting_capital?: number;
+          current_value?: number;
+          joined_at?: string;
         };
         Update: {
           id?: string;
           challenge_id?: string;
           user_id?: string;
-          portfolio_id?: string;
           rank?: number;
-          return_pct?: number;
-          created_at?: string;
+          pnl?: number;
+          starting_capital?: number;
+          current_value?: number;
+          joined_at?: string;
         };
       };
       referrals: {
