@@ -167,11 +167,11 @@ export function GameCard({ game, userRank, onJoin }: GameCardProps) {
               </span>
               {isUpcoming ? (
                 <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400">
-                  🔒 Trading locked
+                   Trading locked
                 </span>
               ) : isActive ? (
                 <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
-                  🟢 Trading active
+                   Trading active
                 </span>
               ) : (
                 <span className="text-[10px] font-bold text-purple-700 dark:text-purple-300 flex items-center gap-1">
