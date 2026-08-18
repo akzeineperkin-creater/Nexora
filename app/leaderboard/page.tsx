@@ -10,11 +10,13 @@ import { PillTabs } from '@/components/ui/Tabs';
 import { GamesSection } from '@/components/games/GamesSection';
 import { formatCurrency } from '@/lib/utils';
 import { useAuth } from '@/providers/AuthProvider';
+import { usePortfolio } from '@/hooks/usePortfolio';
 import { useGames } from '@/hooks/useGames';
 import { formatEasternDateTime, getCountdownString } from '@/lib/games/games-service';
 
 export default function LeaderboardPage() {
-  const { user, profile, portfolio } = useAuth();
+  const { user, profile } = useAuth();
+  const { data: portfolioData, isLoading: portfolioLoading } = usePortfolio();
   const [tab, setTab] = useState('global');
   const { data: gamesData } = useGames('active');
 
@@ -22,21 +24,30 @@ export default function LeaderboardPage() {
   const activeTournament = activeGames[0];
 
   const currentNickname = profile?.nickname || profile?.username || user?.email?.split('@')[0] || 'Trader (You)';
-  const currentStartingCash = (portfolio as any)?.starting_cash ?? (portfolio as any)?.starting_capital ?? 10000;
-  const currentCash = (portfolio as any)?.cash ?? (portfolio as any)?.cash_balance ?? 10000;
-  const currentPnl = currentCash - currentStartingCash;
-  const currentReturnPct = currentStartingCash > 0 ? Number(((currentPnl / currentStartingCash) * 100).toFixed(2)) : 0;
+
+  // Live Total Net Worth, Returns, PnL, and Trades from Central Portfolio Valuation Engine
+  const currentNetWorth = portfolioData?.totalPortfolioValue ?? portfolioData?.totalNetWorth ?? 10000;
+  const currentReturnPct = portfolioData?.totalReturnPct ?? 0;
+  const currentPnl = portfolioData?.totalPnl ?? 0;
+  const totalTradesCount = portfolioData?.transactions?.length ?? 0;
+
+  // Calculate Real Win Rate from Transactions
+  const completedSells = portfolioData?.transactions?.filter((t) => t.type === 'SELL') || [];
+  const winningTrades = completedSells.filter((t) => (t.realized_pnl ?? 0) > 0);
+  const winRate = completedSells.length > 0
+    ? `${Math.round((winningTrades.length / completedSells.length) * 100)}%`
+    : totalTradesCount > 0 ? '100%' : '—';
 
   // Real participants only (no mock bots)
   const leaderboardData = user ? [
     {
       rank: 1,
       name: currentNickname,
-      portfolioValue: currentCash,
+      portfolioValue: currentNetWorth,
       returnPct: currentReturnPct,
       pnl: currentPnl,
-      trades: 0,
-      winRate: '—',
+      trades: totalTradesCount,
+      winRate: winRate,
       isCurrentUser: true,
     }
   ] : [];
@@ -100,7 +111,7 @@ export default function LeaderboardPage() {
       {/* 3. TOP PODIUM CARDS (IF REAL USERS PRESENT) */}
       {top3.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-          {top3.map((u, idx) => (
+          {top3.map((u) => (
             <Card key={u.name} className="flex flex-col items-center text-center p-6 bg-gradient-to-b from-lime-50 to-white dark:from-[#28282B] dark:to-[#1E1E21] border-lime dark:border-lime/80 shadow-lime dark:shadow-dark-card relative">
               <div className="w-8 h-8 rounded-full bg-amber-500 text-white font-extrabold text-xs flex items-center justify-center absolute -top-4 shadow-sm">
                 <Crown className="w-4 h-4" />
@@ -109,7 +120,9 @@ export default function LeaderboardPage() {
                 <User className="w-7 h-7 text-slate-800 dark:text-lime" />
               </div>
               <h4 className="text-base font-extrabold text-slate-dark dark:text-[#F5F5F5]">{u.name}</h4>
-              <div className="text-2xl font-extrabold font-mono text-emerald-600 dark:text-emerald-400 my-1">
+              <div className={`text-2xl font-extrabold font-mono my-1 ${
+                u.returnPct >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'
+              }`}>
                 {u.returnPct >= 0 ? '+' : ''}{u.returnPct}%
               </div>
               <div className="text-xs font-mono font-bold text-slate-dark dark:text-[#F5F5F5]">{formatCurrency(u.portfolioValue)}</div>
