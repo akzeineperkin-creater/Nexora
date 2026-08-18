@@ -10,47 +10,18 @@ import { PillTabs } from '@/components/ui/Tabs';
 import { GamesSection } from '@/components/games/GamesSection';
 import { formatCurrency } from '@/lib/utils';
 import { useAuth } from '@/providers/AuthProvider';
-import { usePortfolio } from '@/hooks/usePortfolio';
+import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useGames } from '@/hooks/useGames';
 import { formatEasternDateTime, getCountdownString } from '@/lib/games/games-service';
 
 export default function LeaderboardPage() {
-  const { user, profile } = useAuth();
-  const { data: portfolioData, isLoading: portfolioLoading } = usePortfolio();
+  const { user } = useAuth();
+  const { data: leaderboardData = [], isLoading: leaderboardLoading } = useLeaderboard();
   const [tab, setTab] = useState('global');
   const { data: gamesData } = useGames('active');
 
   const activeGames = gamesData?.games || [];
   const activeTournament = activeGames[0];
-
-  const currentNickname = profile?.nickname || profile?.username || user?.email?.split('@')[0] || 'Trader (You)';
-
-  // Live Total Net Worth, Returns, PnL, and Trades from Central Portfolio Valuation Engine
-  const currentNetWorth = portfolioData?.totalPortfolioValue ?? portfolioData?.totalNetWorth ?? 10000;
-  const currentReturnPct = portfolioData?.totalReturnPct ?? 0;
-  const currentPnl = portfolioData?.totalPnl ?? 0;
-  const totalTradesCount = portfolioData?.transactions?.length ?? 0;
-
-  // Calculate Real Win Rate from Transactions
-  const completedSells = portfolioData?.transactions?.filter((t) => t.type === 'SELL') || [];
-  const winningTrades = completedSells.filter((t) => (t.realized_pnl ?? 0) > 0);
-  const winRate = completedSells.length > 0
-    ? `${Math.round((winningTrades.length / completedSells.length) * 100)}%`
-    : totalTradesCount > 0 ? '100%' : '—';
-
-  // Real participants only (no mock bots)
-  const leaderboardData = user ? [
-    {
-      rank: 1,
-      name: currentNickname,
-      portfolioValue: currentNetWorth,
-      returnPct: currentReturnPct,
-      pnl: currentPnl,
-      trades: totalTradesCount,
-      winRate: winRate,
-      isCurrentUser: true,
-    }
-  ] : [];
 
   const top3 = leaderboardData.slice(0, 3);
 
@@ -63,7 +34,7 @@ export default function LeaderboardPage() {
             Trading Leaderboard
           </h1>
           <p className="text-xs md:text-sm text-slate-muted dark:text-[#A1A1AA] mt-0.5">
-            Real-time standings for equal-capital simulated tournaments.
+            Real-time standings for equal-capital simulated tournaments and all registered traders.
           </p>
         </div>
 
@@ -112,14 +83,21 @@ export default function LeaderboardPage() {
       {top3.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
           {top3.map((u) => (
-            <Card key={u.name} className="flex flex-col items-center text-center p-6 bg-gradient-to-b from-lime-50 to-white dark:from-[#28282B] dark:to-[#1E1E21] border-lime dark:border-lime/80 shadow-lime dark:shadow-dark-card relative">
+            <Card key={u.userId || u.name} className="flex flex-col items-center text-center p-6 bg-gradient-to-b from-lime-50 to-white dark:from-[#28282B] dark:to-[#1E1E21] border-lime dark:border-lime/80 shadow-lime dark:shadow-dark-card relative">
               <div className="w-8 h-8 rounded-full bg-amber-500 text-white font-extrabold text-xs flex items-center justify-center absolute -top-4 shadow-sm">
                 <Crown className="w-4 h-4" />
               </div>
-              <div className="w-16 h-16 rounded-full bg-lime-100 dark:bg-lime/10 border-2 border-lime flex items-center justify-center text-slate-900 dark:text-lime shadow-subtle mb-2">
-                <User className="w-7 h-7 text-slate-800 dark:text-lime" />
+              <div className="w-16 h-16 rounded-full bg-lime-100 dark:bg-lime/10 border-2 border-lime flex items-center justify-center text-slate-900 dark:text-lime shadow-subtle mb-2 overflow-hidden">
+                {u.avatarUrl ? (
+                  <img src={u.avatarUrl} alt={u.name} className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-7 h-7 text-slate-800 dark:text-lime" />
+                )}
               </div>
-              <h4 className="text-base font-extrabold text-slate-dark dark:text-[#F5F5F5]">{u.name}</h4>
+              <div className="flex items-center gap-1.5 justify-center">
+                <h4 className="text-base font-extrabold text-slate-dark dark:text-[#F5F5F5]">{u.name}</h4>
+                {u.isCurrentUser && <Badge variant="lime" size="sm">You</Badge>}
+              </div>
               <div className={`text-2xl font-extrabold font-mono my-1 ${
                 u.returnPct >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'
               }`}>
@@ -163,7 +141,7 @@ export default function LeaderboardPage() {
                   const isYou = u.isCurrentUser;
                   return (
                     <tr
-                      key={u.name}
+                      key={u.userId || u.name}
                       className={`hover:bg-slate-50/70 dark:hover:bg-[#323236] transition-colors ${
                         isYou ? 'bg-lime-50/80 dark:bg-[#353539] border-l-4 border-lime font-bold' : ''
                       }`}
@@ -171,8 +149,12 @@ export default function LeaderboardPage() {
                       <td className="py-3.5 px-2.5 sm:px-4 font-mono font-extrabold text-xs sm:text-sm text-slate-dark dark:text-[#F5F5F5]">#{u.rank}</td>
                       <td className="py-3.5 px-2.5 sm:px-4">
                         <div className="flex items-center gap-2 sm:gap-2.5">
-                          <div className="w-7 h-7 rounded-full bg-slate-100 dark:bg-[#1E1E21] border border-slate-200 dark:border-[#3A3A3D] flex items-center justify-center text-slate-600 dark:text-[#A1A1AA] shrink-0">
-                            <User className="w-3.5 h-3.5" />
+                          <div className="w-7 h-7 rounded-full bg-slate-100 dark:bg-[#1E1E21] border border-slate-200 dark:border-[#3A3A3D] flex items-center justify-center text-slate-600 dark:text-[#A1A1AA] shrink-0 overflow-hidden">
+                            {u.avatarUrl ? (
+                              <img src={u.avatarUrl} alt={u.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <User className="w-3.5 h-3.5" />
+                            )}
                           </div>
                           <span className="font-extrabold text-xs sm:text-sm text-slate-dark dark:text-[#F5F5F5]">{u.name}</span>
                           {isYou && <Badge variant="lime" size="sm">You</Badge>}

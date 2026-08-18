@@ -1,7 +1,21 @@
-import { type NextRequest } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // 1. Immediately bypass Next.js internal bundles, static chunks, assets, and APIs
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/images') ||
+    pathname === '/favicon.ico' ||
+    pathname === '/hero-bg.jpg' ||
+    pathname.includes('.')
+  ) {
+    return NextResponse.next();
+  }
+
   return await updateSession(request);
 }
 
