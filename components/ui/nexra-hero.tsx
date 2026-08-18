@@ -66,22 +66,70 @@ export function NexraHero() {
       {/* ========================================================================= */}
       {/* 1. ROUNDED FULL-SCREEN CINEMATIC CONTAINER */}
       {/* ========================================================================= */}
-      <div className="relative w-full h-full flex-1 flex flex-col justify-between rounded-[22px] sm:rounded-[32px] md:rounded-[42px] overflow-hidden border border-white/10 shadow-2xl bg-gradient-to-b from-[#0B1510] via-[#070E0A] to-[#050807]">
+      <div className="relative w-full h-full flex-1 flex flex-col justify-between rounded-[22px] sm:rounded-[32px] md:rounded-[42px] overflow-hidden border border-white/15 shadow-2xl bg-black">
         {/* ========================================================================= */}
-        {/* 2. ELEGANT ABSTRACT BACKGROUND (Soft lights, gradients & subtle grain) */}
+        {/* 2. CINEMATIC BACKGROUND IMAGE WITH GENTLY MOVING CLOUDS */}
         {/* ========================================================================= */}
         <div className="absolute inset-0 pointer-events-none select-none z-0 overflow-hidden">
-          {/* Subtle Ambient Radial Lighting */}
-          <div className="absolute -top-[20%] left-1/2 -translate-x-1/2 w-[70vw] h-[55vh] bg-[radial-gradient(ellipse_at_center,rgba(184,245,0,0.07)_0%,rgba(16,185,129,0.04)_40%,transparent_70%)] blur-[100px]" />
-          <div className="absolute -bottom-[25%] -right-[10%] w-[50vw] h-[50vh] bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.06)_0%,transparent_70%)] blur-[120px]" />
-          <div className="absolute -bottom-[20%] -left-[10%] w-[45vw] h-[45vh] bg-[radial-gradient(ellipse_at_center,rgba(184,245,0,0.05)_0%,transparent_70%)] blur-[100px]" />
+          {/* Base Background Photo with Subtle Breathing Ambient Zoom */}
+          <motion.div
+            animate={{
+              scale: [1.02, 1.05, 1.02],
+              x: [0, -8, 0],
+              y: [0, -4, 0],
+            }}
+            transition={{
+              duration: 28,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+            className="absolute inset-0 w-full h-full"
+          >
+            <Image
+              src="/hero-bg.jpg"
+              alt="Nexra Hero Background"
+              fill
+              priority
+              quality={95}
+              className="object-cover object-center sm:object-[center_35%]"
+            />
+          </motion.div>
 
-          {/* Deep Vignette */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_35%,rgba(5,8,7,0.85)_100%)]" />
+          {/* Animated Gentle Drifting Cloud Layer 1 (Over right cloud bank) */}
+          <div
+            className="absolute -top-10 right-0 w-[65vw] h-[85vh] opacity-35 mix-blend-screen pointer-events-none animate-cloud-slow"
+            style={{
+              background:
+                'radial-gradient(ellipse at 70% 35%, rgba(255,210,170,0.5) 0%, rgba(255,180,120,0.25) 35%, transparent 70%)',
+              filter: 'blur(30px)',
+            }}
+          />
+
+          {/* Animated Gentle Drifting Cloud Layer 2 (Secondary billow) */}
+          <div
+            className="absolute top-10 right-10 w-[50vw] h-[65vh] opacity-25 mix-blend-overlay pointer-events-none animate-cloud-fast"
+            style={{
+              background:
+                'radial-gradient(ellipse at 80% 45%, rgba(255,240,220,0.6) 0%, rgba(255,200,150,0.2) 40%, transparent 70%)',
+              filter: 'blur(40px)',
+            }}
+          />
+
+          {/* Soft Golden/Lime Atmospheric Embers in the sky */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_35%,rgba(255,190,120,0.12)_0%,transparent_50%)] pointer-events-none" />
+
+          {/* Top Navbar Dark Shadow Gradient */}
+          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black/80 via-black/40 to-transparent z-[1]" />
+
+          {/* Bottom Heavy Vignette & Dark Contrast Gradient for Typography & Buttons */}
+          <div className="absolute bottom-0 left-0 right-0 h-[62%] bg-gradient-to-t from-black via-black/80 to-transparent z-[2]" />
+
+          {/* Radial Center Vignette */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,rgba(0,0,0,0.65)_100%)] z-[3]" />
 
           {/* Minimal Film Grain Texture */}
           <div
-            className="absolute inset-0 opacity-[0.035] mix-blend-overlay"
+            className="absolute inset-0 opacity-[0.03] mix-blend-overlay z-[4]"
             style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
             }}
@@ -120,7 +168,7 @@ export function NexraHero() {
             </Link>
 
             {/* Centered Prisma-Style Floating Black Pill Tab */}
-            <div className="hidden sm:flex items-center gap-7 px-8 py-3 rounded-b-2xl bg-[#090D0B]/85 backdrop-blur-xl border-x border-b border-white/10 shadow-2xl text-xs font-semibold text-zinc-300">
+            <div className="hidden sm:flex items-center gap-7 px-8 py-3 rounded-b-2xl bg-[#080808]/90 backdrop-blur-xl border-x border-b border-white/15 shadow-2xl text-xs font-semibold text-zinc-300">
               <Link
                 href="/markets"
                 className="hover:text-white hover:text-lime transition-colors"
@@ -277,7 +325,7 @@ export function NexraHero() {
                   <div key={idx} className="overflow-hidden inline-block">
                     <motion.span
                       variants={letterVariants}
-                      className="inline-block font-display font-black text-[22vw] sm:text-[19vw] md:text-[16vw] lg:text-[14.5vw] tracking-[-0.045em] leading-[0.84] text-white drop-shadow-md"
+                      className="inline-block font-display font-black text-[22vw] sm:text-[19vw] md:text-[16vw] lg:text-[14.5vw] tracking-[-0.045em] leading-[0.84] text-white drop-shadow-lg"
                     >
                       {letter}
                     </motion.span>
@@ -311,7 +359,7 @@ export function NexraHero() {
               </div>
 
               {/* Main Short Description */}
-              <p className="text-xs sm:text-sm md:text-base text-zinc-300 leading-relaxed font-normal">
+              <p className="text-xs sm:text-sm md:text-base text-zinc-200 leading-relaxed font-normal">
                 Nexra is an investment simulator that helps you learn how financial markets work through real market data and virtual money.
               </p>
 
@@ -332,7 +380,7 @@ export function NexraHero() {
 
                 <Link
                   href="/markets"
-                  className="px-5 py-3 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-xs sm:text-sm hover:border-white/30 backdrop-blur-md flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  className="px-5 py-3 rounded-full bg-black/40 hover:bg-black/60 border border-white/20 text-white font-bold text-xs sm:text-sm hover:border-white/40 backdrop-blur-md flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   <BarChart3 className="w-4 h-4 text-zinc-400" />
                   <span>Explore Markets</span>

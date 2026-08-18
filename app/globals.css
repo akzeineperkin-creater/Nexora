@@ -129,6 +129,27 @@
   animation: spinSlow 12s linear infinite;
 }
 
+/* Gentle Cloud Drift Animations */
+@keyframes cloudDriftSlow {
+  0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.3; }
+  50% { transform: translate3d(30px, -14px, 0) scale(1.04); opacity: 0.5; }
+  100% { transform: translate3d(60px, 0, 0) scale(1); opacity: 0.3; }
+}
+
+@keyframes cloudDriftFast {
+  0% { transform: translate3d(-20px, 0, 0) scale(1.02); opacity: 0.25; }
+  50% { transform: translate3d(25px, -20px, 0) scale(1.07); opacity: 0.45; }
+  100% { transform: translate3d(70px, 0, 0) scale(1.02); opacity: 0.25; }
+}
+
+.animate-cloud-slow {
+  animation: cloudDriftSlow 26s ease-in-out infinite alternate;
+}
+
+.animate-cloud-fast {
+  animation: cloudDriftFast 20s ease-in-out infinite alternate;
+}
+
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
