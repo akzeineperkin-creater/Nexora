@@ -110,7 +110,23 @@
 }
 
 .animate-marquee {
-  animation: marquee 40s linear infinite;
+  animation: marquee 35s linear infinite;
+}
+
+/* Floating Stock Card Gentle Float Animation */
+@keyframes floatingCard {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(0.4deg); }
+  100% { transform: translateY(-14px) rotate(-0.4deg); }
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 12s linear infinite;
 }
 
 /* Custom Scrollbars */

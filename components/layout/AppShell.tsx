@@ -32,19 +32,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Public authentication routes
+  // Public routes (landing page, login, register)
+  const isLandingPage = pathname === '/';
   const isAuthPage = pathname === '/login' || pathname === '/register';
+  const isPublicPage = isLandingPage || isAuthPage;
 
-  // If user is unauthenticated on a protected route, trigger client redirect to /register
+  // If user is unauthenticated on a protected dashboard route, trigger client redirect to /register
   useEffect(() => {
-    if (!isLoading && !user && !isAuthPage) {
+    if (!isLoading && !user && !isPublicPage) {
       router.replace('/register');
     }
-  }, [isLoading, user, isAuthPage, router]);
+  }, [isLoading, user, isPublicPage, router]);
 
-  // For /login and /register routes, render without persistent shell
-  if (isAuthPage) {
-    return <main className="min-h-screen bg-slate-app antialiased w-full overflow-x-hidden">{children}</main>;
+  // For landing page, login, and register routes, render full-bleed without the trader shell
+  if (isPublicPage) {
+    return <main className="min-h-screen bg-[#050807] text-[#F5F5F5] antialiased w-full overflow-x-hidden">{children}</main>;
   }
 
   // Prevent ANY flash of trader/dashboard UI while checking auth session or if unauthenticated
