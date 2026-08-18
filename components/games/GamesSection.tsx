@@ -76,9 +76,9 @@ export function GamesSection({
         <PillTabs
           items={[
             { id: 'all', label: 'All Tournaments' },
-            { id: 'active', label: '🟢 Live (Active)' },
-            { id: 'upcoming', label: '🔒 Upcoming' },
-            { id: 'completed', label: '🏆 Completed' },
+            { id: 'active', label: ' Live (Active)' },
+            { id: 'upcoming', label: ' Upcoming' },
+            { id: 'completed', label: ' Completed' },
           ]}
           activeId={activeTab}
           onChange={(id) => setActiveTab(id as any)}
