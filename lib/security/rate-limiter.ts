@@ -146,6 +146,107 @@ export function checkRateLimit(
 }
 
 /**
+ * Distributed Rate Limiter for Vercel / Edge / Serverless environments.
+ * Uses Upstash Redis REST API when UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are defined.
+ * Automatically falls back to the in-memory sliding window limiter if unconfigured or on network error.
+ */
+export async function checkDistributedRateLimit(
+  req: NextRequest,
+  options: RateLimitOptions
+): Promise<RateLimitResult> {
+  const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
+  const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  if (!upstashUrl || !upstashToken) {
+    return checkRateLimit(req, options);
+  }
+
+  const ip = getClientIp(req);
+  const identifier = options.userId ? `uid_${options.userId}` : `ip_${ip}`;
+  const key = `nexra_rl:${options.keyPrefix}:${identifier}`;
+  const now = Date.now();
+
+  try {
+    const pipelineUrl = `${upstashUrl.replace(/\/$/, '')}/pipeline`;
+    const response = await fetch(pipelineUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${upstashToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify([
+        ['INCR', key],
+        ['EXPIRE', key, options.windowSeconds, 'NX'],
+        ['TTL', key],
+      ]),
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      console.warn(`[RateLimiter] Upstash HTTP error (${response.status}), falling back to in-memory.`);
+      return checkRateLimit(req, options);
+    }
+
+    const data = await response.json();
+    const currentCount = Number(data?.[0]?.result ?? 1);
+    const ttl = Math.max(1, Number(data?.[2]?.result ?? options.windowSeconds));
+
+    const resetEpochSeconds = Math.ceil(now / 1000) + ttl;
+    const remaining = Math.max(0, options.limit - currentCount);
+
+    const headers: Record<string, string> = {
+      'X-RateLimit-Limit': String(options.limit),
+      'X-RateLimit-Remaining': String(remaining),
+      'X-RateLimit-Reset': String(resetEpochSeconds),
+      'X-RateLimit-Backend': 'upstash-redis-distributed',
+    };
+
+    if (currentCount > options.limit) {
+      headers['Retry-After'] = String(ttl);
+
+      logSecurityEvent({
+        event: 'RATE_LIMIT_EXCEEDED',
+        endpoint: req.nextUrl.pathname,
+        method: req.method,
+        ip,
+        userId: options.userId,
+        details: {
+          backend: 'upstash-redis',
+          keyPrefix: options.keyPrefix,
+          limit: options.limit,
+          windowSeconds: options.windowSeconds,
+          retryAfter: ttl,
+        },
+        severity: 'WARN',
+      });
+
+      return {
+        success: false,
+        limit: options.limit,
+        remaining: 0,
+        reset: resetEpochSeconds,
+        retryAfter: ttl,
+        headers,
+      };
+    }
+
+    return {
+      success: true,
+      limit: options.limit,
+      remaining,
+      reset: resetEpochSeconds,
+      retryAfter: 0,
+      headers,
+    };
+  } catch (err: any) {
+    console.warn('[RateLimiter] Upstash Redis exception, fallback to in-memory:', err.message);
+    return checkRateLimit(req, options);
+  }
+}
+
+export const checkRateLimitAsync = checkDistributedRateLimit;
+
+/**
  * Generates an HTTP 429 Too Many Requests response with standard rate limit headers
  */
 export function createRateLimitExceededResponse(result: RateLimitResult): NextResponse {

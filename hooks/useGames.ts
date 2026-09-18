@@ -44,18 +44,14 @@ export function useGames(status?: 'active' | 'upcoming' | 'completed') {
 
 export function useCreateGame() {
   const queryClient = useQueryClient();
-  const { user, profile } = useAuth();
 
   return useMutation({
     mutationFn: async (payload: CreateGamePayload) => {
-      const creatorName = profile?.nickname || profile?.username || user?.email?.split('@')[0] || 'Trader';
       const res = await fetch('/api/games', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...payload,
-          creatorId: user?.id,
-          creatorName,
         }),
       });
 
@@ -87,7 +83,6 @@ export function useVerifyGamePassword() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           password,
-          userId: user?.id,
         }),
       });
 
@@ -115,9 +110,8 @@ export function useVerifyGamePassword() {
 }
 
 export function useGameSession(gameId: string) {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const userId = user?.id || '';
-  const username = profile?.nickname || profile?.username || user?.email?.split('@')[0] || 'Trader';
 
   return useQuery<{
     game: TradingGame;
@@ -133,10 +127,6 @@ export function useGameSession(gameId: string) {
     queryKey: ['game-session', gameId, userId],
     queryFn: async () => {
       const url = new URL(`/api/games/${gameId}`, window.location.origin);
-      if (userId) {
-        url.searchParams.set('userId', userId);
-        url.searchParams.set('username', username);
-      }
 
       const headers: Record<string, string> = {};
       if (typeof window !== 'undefined') {
@@ -174,22 +164,18 @@ export function useGameSession(gameId: string) {
 
 export function useJoinGame(gameId: string) {
   const queryClient = useQueryClient();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (payload?: { password?: string }) => {
       if (!user?.id) {
         throw new Error('Please sign in to your Nexra account to join tournaments.');
       }
-      const userId = user.id;
-      const username = profile?.nickname || profile?.username || user?.email?.split('@')[0] || 'Trader';
 
       const res = await fetch(`/api/games/${gameId}/join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId,
-          username,
           password: payload?.password,
         }),
       });
@@ -217,14 +203,11 @@ export function useLeaveGame(gameId: string) {
       if (!user?.id) {
         throw new Error('Please sign in to leave a tournament.');
       }
-      const userId = user.id;
 
       const res = await fetch(`/api/games/${gameId}/leave`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-        }),
+        body: JSON.stringify({}),
       });
 
       if (!res.ok) {
@@ -243,7 +226,7 @@ export function useLeaveGame(gameId: string) {
 
 export function useGameTrade(gameId: string) {
   const queryClient = useQueryClient();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (params: {
@@ -256,16 +239,12 @@ export function useGameTrade(gameId: string) {
       if (!user?.id) {
         throw new Error('Please sign in to your Nexra account to execute tournament trades.');
       }
-      const userId = user.id;
-      const username = profile?.nickname || profile?.username || user?.email?.split('@')[0] || 'Trader';
 
       const res = await fetch(`/api/games/${gameId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...params,
-          userId,
-          username,
         }),
       });
 

@@ -393,8 +393,12 @@ export function AuthSwitch({
 
         {/* Cloudflare Turnstile Bot Protection */}
         <TurnstileWidget
+          key={`turnstile-${mode}`}
           ref={turnstileRef}
-          onSuccess={(token) => setTurnstileToken(token)}
+          onSuccess={(token) => {
+            setTurnstileToken(token);
+            resetFormErrors();
+          }}
           onError={() => setTurnstileToken(null)}
           onExpire={() => setTurnstileToken(null)}
         />
@@ -402,13 +406,23 @@ export function AuthSwitch({
         {/* 5. PRIMARY LIME CTA BUTTON (#B8F500) */}
         <button
           type="submit"
-          disabled={isLoading}
-          className="w-full mt-2 py-3 px-4 rounded-full bg-[#B8F500] hover:bg-[#A6DE00] active:scale-[0.98] text-[#0F0B0A] font-extrabold text-xs sm:text-sm transition-all duration-180 shadow-lime flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed select-none"
+          disabled={!turnstileToken || isLoading}
+          className={cn(
+            'w-full mt-2 py-3 px-4 rounded-full bg-[#B8F500] hover:bg-[#A6DE00] active:scale-[0.98] text-[#0F0B0A] font-extrabold text-xs sm:text-sm transition-all duration-180 shadow-lime flex items-center justify-center gap-2 select-none',
+            !turnstileToken || isLoading
+              ? 'opacity-60 cursor-not-allowed pointer-events-none'
+              : 'cursor-pointer'
+          )}
         >
           {isLoading ? (
             <div className="flex items-center gap-2">
               <span className="w-4 h-4 border-2 border-[#0F0B0A] border-t-transparent rounded-full animate-spin" />
               <span>Processing...</span>
+            </div>
+          ) : !turnstileToken ? (
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4" />
+              <span>{isSignUp ? 'Complete Verification to Sign Up' : 'Complete Verification to Sign In'}</span>
             </div>
           ) : (
             <>
