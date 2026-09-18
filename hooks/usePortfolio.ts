@@ -13,32 +13,20 @@ export function usePortfolio() {
   return useQuery({
     queryKey: ['portfolio', portfolioId, user?.id],
     queryFn: async () => {
-      if (!user?.id && !portfolioId) {
+      if (!user?.id) {
         return null;
       }
 
-      // 1. Fetch live Portfolio record from public.portfolios
+      // 1. Fetch live Portfolio record strictly for the authenticated user from public.portfolios
       let currentPortfolio = authPortfolio;
-      if (user?.id) {
-        const { data: pData, error: pErr } = await supabase
-          .from('portfolios')
-          .select('*')
-          .eq('user_id', user.id)
-          .maybeSingle();
+      const { data: pData, error: pErr } = await supabase
+        .from('portfolios')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-        if (!pErr && pData) {
-          currentPortfolio = pData;
-        }
-      } else if (portfolioId) {
-        const { data: pData, error: pErr } = await supabase
-          .from('portfolios')
-          .select('*')
-          .eq('id', portfolioId)
-          .maybeSingle();
-
-        if (!pErr && pData) {
-          currentPortfolio = pData;
-        }
+      if (!pErr && pData) {
+        currentPortfolio = pData;
       }
 
       const activePortfolioId = currentPortfolio?.id;

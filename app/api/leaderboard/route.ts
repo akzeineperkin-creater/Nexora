@@ -1,24 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase/client';
+import { checkRateLimit, createRateLimitExceededResponse, RateLimitTiers } from '@/lib/security/rate-limiter';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    // 1. Query all registered public profiles from Supabase
+    const rateCheck = checkRateLimit(request, {
+      keyPrefix: 'leaderboard',
+      ...RateLimitTiers.DATA_FEED,
+    });
+    if (!rateCheck.success) {
+      return createRateLimitExceededResponse(rateCheck);
+    }
+
+    // 1. Query public profiles from Supabase
     const { data: profiles, error: profErr } = await (supabase as any)
       .from('profiles')
       .select('id, username, full_name, avatar_url, level, xp, created_at')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(100);
 
     if (profErr) {
       console.warn('[API /api/leaderboard GET] profiles query warning:', profErr.message);
     }
 
-    // 2. Query all portfolios from Supabase
+    // 2. Query portfolios (aggregated non-sensitive metrics for leaderboard)
     const { data: portfolios, error: portErr } = await (supabase as any)
       .from('portfolios')
-      .select('id, user_id, cash, starting_cash, created_at');
+      .select('id, user_id, cash, starting_cash, created_at')
+      .limit(100);
 
     if (portErr) {
       console.warn('[API /api/leaderboard GET] portfolios query warning:', portErr.message);
@@ -58,29 +69,40 @@ export async function GET(request: NextRequest) {
         avatarUrl: prof.avatar_url || null,
         level: prof.level || 1,
         portfolioValue: cash,
-        startingCapital,
-        pnl,
-        returnPct,
-        trades: 0,
-        winRate: '—',
-        createdAt: prof.created_at,
+        totalPnl: pnl,
+        returnPercentage: returnPct,
+        rank: 0,
       };
     });
 
-    // 4. Sort by returnPct descending
-    entries.sort((a, b) => b.returnPct - a.returnPct);
+    // Sort by return percentage descending
+    entries.sort((a: any, b: any) => b.returnPercentage - a.returnPercentage);
+    entries.forEach((e: any, idx: number) => {
+      e.rank = idx + 1;
+    });
 
-    // Assign 1-indexed ranks
-    const ranked = entries.map((item, idx) => ({
-      ...item,
-      rank: idx + 1,
-    }));
-
-    return NextResponse.json({ success: true, count: ranked.length, leaderboard: ranked }, { status: 200 });
-  } catch (err: any) {
-    console.error('[API /api/leaderboard GET] error:', err.message);
     return NextResponse.json(
-      { error: 'Failed to fetch leaderboard', message: err.message },
+      {
+        leaderboard: entries,
+        count: entries.length,
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        status: 200,
+        headers: {
+          'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
+          ...rateCheck.headers,
+        },
+      }
+    );
+  } catch (err: any) {
+    console.error('[API /api/leaderboard GET] Error:', err.message);
+    return NextResponse.json(
+      {
+        leaderboard: [],
+        count: 0,
+        error: 'Leaderboard temporarily unavailable.',
+      },
       { status: 500 }
     );
   }

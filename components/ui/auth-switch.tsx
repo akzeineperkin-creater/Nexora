@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/AuthProvider';
+import { TurnstileWidget, TurnstileWidgetRef } from '@/components/security/TurnstileWidget';
 
 export interface AuthSwitchProps {
   initialMode?: 'signin' | 'signup';
@@ -31,6 +32,7 @@ export function AuthSwitch({
 }: AuthSwitchProps) {
   const router = useRouter();
   const { signIn, signUp } = useAuth();
+  const turnstileRef = React.useRef<TurnstileWidgetRef>(null);
 
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode);
   const [nickname, setNickname] = useState('');
@@ -39,6 +41,7 @@ export function AuthSwitch({
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -53,6 +56,8 @@ export function AuthSwitch({
 
   const handleModeSwitch = (newMode: 'signin' | 'signup') => {
     setMode(newMode);
+    setTurnstileToken(null);
+    turnstileRef.current?.reset();
     resetFormErrors();
   };
 
@@ -89,9 +94,30 @@ export function AuthSwitch({
       }
     }
 
+    // Bot Protection: Ensure human verification challenge is completed
+    if (!turnstileToken) {
+      setErrorMsg('Please complete the human verification challenge.');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
+      // Verify Turnstile token server-side via Cloudflare API endpoint
+      const verifyRes = await fetch('/api/auth/turnstile-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: turnstileToken }),
+      });
+      const verifyData = await verifyRes.json().catch(() => ({}));
+
+      if (!verifyRes.ok || !verifyData.success) {
+        setErrorMsg(verifyData.error || 'Human verification failed. Please try again.');
+        setIsLoading(false);
+        turnstileRef.current?.reset();
+        setTurnstileToken(null);
+        return;
+      }
       if (isSignUp) {
         const res = await signUp(cleanEmail, cleanPassword, nickname.trim());
         if (res?.error) {
@@ -364,6 +390,14 @@ export function AuthSwitch({
             <span>Includes <strong>$10,000.00</strong> zero-risk virtual trading sandbox.</span>
           </div>
         )}
+
+        {/* Cloudflare Turnstile Bot Protection */}
+        <TurnstileWidget
+          ref={turnstileRef}
+          onSuccess={(token) => setTurnstileToken(token)}
+          onError={() => setTurnstileToken(null)}
+          onExpire={() => setTurnstileToken(null)}
+        />
 
         {/* 5. PRIMARY LIME CTA BUTTON (#B8F500) */}
         <button
