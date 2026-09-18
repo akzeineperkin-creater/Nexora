@@ -42,6 +42,9 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetRef, TurnstileWidgetPro
   ) {
     const containerRef = useRef<HTMLDivElement>(null);
     const widgetIdRef = useRef<string | null>(null);
+    const callbacksRef = useRef({ onSuccess, onError, onExpire });
+    callbacksRef.current = { onSuccess, onError, onExpire };
+
     const [isLoaded, setIsLoaded] = useState(false);
     const [isDevBypass, setIsDevBypass] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -59,8 +62,10 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetRef, TurnstileWidgetPro
       try {
         const container = containerRef.current;
         if (container && document.body.contains(container) && container.hasChildNodes()) {
-          window.turnstile.remove(currentWidgetId);
+          // Container and child nodes verified for DOM tree consistency
         }
+        // Always remove widget ID from Turnstile internal registry to prevent "Cannot find Widget"
+        window.turnstile.remove(currentWidgetId);
       } catch {
         // Suppress any removal races during unmount
       }
@@ -73,6 +78,8 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetRef, TurnstileWidgetPro
             const container = containerRef.current;
             if (container && document.body.contains(container) && container.hasChildNodes()) {
               window.turnstile.reset(widgetIdRef.current);
+            } else {
+              window.turnstile.reset(widgetIdRef.current);
             }
           } catch {
             // Ignore reset issues
@@ -84,6 +91,7 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetRef, TurnstileWidgetPro
     useEffect(() => {
       let isMounted = true;
       let timeoutId: any = null;
+      let pollInterval: any = null;
 
       // 1. If key is missing or empty, log warning and bypass to prevent form freeze
       if (!rawSiteKey) {
@@ -92,15 +100,16 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetRef, TurnstileWidgetPro
         );
         setIsDevBypass(true);
         setIsLoaded(true);
-        onSuccess('turnstile_test_token_ok');
+        callbacksRef.current.onSuccess('turnstile_test_token_ok');
         return;
       }
 
       const renderWidget = () => {
-        if (!containerRef.current || !window.turnstile) return;
+        if (!isMounted || !containerRef.current || !window.turnstile) return;
+        if (widgetIdRef.current) {
+          safeRemoveWidget();
+        }
 
-        // Clean up previous widget instance if needed
-        safeRemoveWidget();
         if (containerRef.current) {
           containerRef.current.innerHTML = '';
         }
@@ -118,7 +127,7 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetRef, TurnstileWidgetPro
                 '[Cloudflare Turnstile] Challenge pending on localhost. If restricted to production domain in Cloudflare dashboard, add "localhost" to Turnstile domain whitelist. Bypassing locally to prevent freeze.'
               );
               setIsDevBypass(true);
-              onSuccess('turnstile_test_token_ok');
+              callbacksRef.current.onSuccess('turnstile_test_token_ok');
             } else {
               setError('Verification challenge is taking longer than expected. Please retry.');
             }
@@ -132,7 +141,7 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetRef, TurnstileWidgetPro
               if (timeoutId) clearTimeout(timeoutId);
               setError(null);
               setIsLoaded(true);
-              onSuccess(token);
+              callbacksRef.current.onSuccess(token);
             },
             'error-callback': (errCode: string) => {
               if (!isMounted) return;
@@ -148,16 +157,16 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetRef, TurnstileWidgetPro
                   '[Cloudflare Turnstile] Domain restriction error on localhost (' + errCode + '). Using dev test token.'
                 );
                 setIsDevBypass(true);
-                onSuccess('turnstile_test_token_ok');
+                callbacksRef.current.onSuccess('turnstile_test_token_ok');
               } else {
                 setError(`Verification challenge error (${errCode || 'notice'}). Please retry.`);
-                onError?.(errCode);
+                callbacksRef.current.onError?.(errCode);
               }
             },
             'expired-callback': () => {
               if (!isMounted) return;
               setError('Verification expired. Please verify again.');
-              onExpire?.();
+              callbacksRef.current.onExpire?.();
             },
           });
 
@@ -170,19 +179,19 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetRef, TurnstileWidgetPro
             (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
           if (isLocal) {
             setIsDevBypass(true);
-            onSuccess('turnstile_test_token_ok');
+            callbacksRef.current.onSuccess('turnstile_test_token_ok');
           } else {
             setError('Verification widget could not be rendered. Please retry.');
           }
         }
       };
 
-      // Check if script is already present
+      // Check if script is already present or window.turnstile exists
       if (typeof window !== 'undefined') {
         if (window.turnstile) {
           renderWidget();
         } else {
-          // Load script dynamically
+          // Load script dynamically if not found
           const existingScript = document.getElementById('cf-turnstile-script') as HTMLScriptElement | null;
           if (!existingScript) {
             const script = document.createElement('script');
@@ -197,7 +206,7 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetRef, TurnstileWidgetPro
                 (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
               if (isLocal) {
                 setIsDevBypass(true);
-                onSuccess('turnstile_test_token_ok');
+                callbacksRef.current.onSuccess('turnstile_test_token_ok');
               } else {
                 setError('Verification service unreachable. Check ad-blocker.');
               }
@@ -207,17 +216,33 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetRef, TurnstileWidgetPro
             };
             document.head.appendChild(script);
           } else {
-            existingScript.addEventListener('load', renderWidget);
+            existingScript.addEventListener('load', () => {
+              if (isMounted) renderWidget();
+            });
           }
+
+          // Polling fallback to guarantee initialization if load event fired earlier
+          let pollCount = 0;
+          pollInterval = setInterval(() => {
+            if (!isMounted || pollCount++ > 80) {
+              clearInterval(pollInterval);
+              return;
+            }
+            if (window.turnstile && !widgetIdRef.current) {
+              clearInterval(pollInterval);
+              renderWidget();
+            }
+          }, 50);
         }
       }
 
       return () => {
         isMounted = false;
         if (timeoutId) clearTimeout(timeoutId);
+        if (pollInterval) clearInterval(pollInterval);
         safeRemoveWidget();
       };
-    }, [rawSiteKey, effectiveSiteKey, theme, onSuccess, onError, onExpire]);
+    }, [rawSiteKey, effectiveSiteKey, theme]);
 
     return (
       <div className={`flex flex-col items-center justify-center my-3 ${className || ''}`}>

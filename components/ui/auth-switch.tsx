@@ -55,9 +55,9 @@ export function AuthSwitch({
   };
 
   const handleModeSwitch = (newMode: 'signin' | 'signup') => {
+    if (newMode === mode) return;
     setMode(newMode);
     setTurnstileToken(null);
-    turnstileRef.current?.reset();
     resetFormErrors();
   };
 
@@ -123,12 +123,16 @@ export function AuthSwitch({
         if (res?.error) {
           setErrorMsg(res.error.message || 'Failed to create account.');
           setIsLoading(false);
+          turnstileRef.current?.reset();
+          setTurnstileToken(null);
           return;
         }
 
         if (!res?.data?.user) {
           setErrorMsg('Failed to create account in Supabase. Please try again.');
           setIsLoading(false);
+          turnstileRef.current?.reset();
+          setTurnstileToken(null);
           return;
         }
 
@@ -148,12 +152,16 @@ export function AuthSwitch({
         if (res?.error) {
           setErrorMsg(res.error.message || 'Invalid login credentials.');
           setIsLoading(false);
+          turnstileRef.current?.reset();
+          setTurnstileToken(null);
           return;
         }
 
         if (!res?.data?.user && !res?.data?.session) {
           setErrorMsg('Invalid login credentials.');
           setIsLoading(false);
+          turnstileRef.current?.reset();
+          setTurnstileToken(null);
           return;
         }
 
@@ -172,6 +180,8 @@ export function AuthSwitch({
     } catch (err: any) {
       setErrorMsg(err.message || 'An unexpected authentication error occurred.');
       setIsLoading(false);
+      turnstileRef.current?.reset();
+      setTurnstileToken(null);
     }
   };
 

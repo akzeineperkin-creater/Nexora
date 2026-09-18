@@ -23,10 +23,10 @@ const nextConfig = {
             value: [
               "default-src 'self'",
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://challenges.cloudflare.com",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "font-src 'self' https://fonts.gstatic.com data:",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com",
+              "font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com data:",
               "frame-src 'self' https://challenges.cloudflare.com",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com",
               "img-src 'self' data: blob: https:",
               "object-src 'none'",
               "base-uri 'self'",
