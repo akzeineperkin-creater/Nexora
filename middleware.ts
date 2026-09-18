@@ -47,19 +47,21 @@ export async function middleware(request: NextRequest) {
   }
 
   // 4. Inject Baseline Defensive HTTP Security Headers
-  const cspDirectives = [
+  const cspHeader = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
+    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://challenges.cloudflare.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com data:",
     "frame-src 'self' https://challenges.cloudflare.com",
-    "connect-src 'self' https://challenges.cloudflare.com https://*.supabase.co wss://*.supabase.co https://api.marketaux.com https://finnhub.io https://*.upstash.io",
-    "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' blob: data: https:",
-    "font-src 'self' data:",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com",
+    "img-src 'self' data: blob: https:",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-  ];
-  response.headers.set('Content-Security-Policy', cspDirectives.join('; '));
+    "frame-ancestors 'none'"
+  ].join('; ');
+
+  response.headers.set('Content-Security-Policy', cspHeader);
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');

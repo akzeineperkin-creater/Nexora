@@ -325,10 +325,30 @@ assert(
   "middleware.ts includes https://challenges.cloudflare.com in frame-src"
 );
 
+assert(
+  middlewareContent.includes("https://fonts.googleapis.com") && middlewareContent.includes("https://fonts.gstatic.com"),
+  "middleware.ts includes https://fonts.googleapis.com (style-src) and https://fonts.gstatic.com (font-src)"
+);
+
+assert(
+  middlewareContent.includes("frame-ancestors 'none'"),
+  "middleware.ts includes frame-ancestors 'none'"
+);
+
 const nextConfigContent = fs.readFileSync(path.join(rootDir, 'next.config.mjs'), 'utf-8');
 assert(
   nextConfigContent.includes("'unsafe-eval'") && nextConfigContent.includes('https://challenges.cloudflare.com'),
   "next.config.mjs headers include 'unsafe-eval' and https://challenges.cloudflare.com"
+);
+
+assert(
+  nextConfigContent.includes("https://fonts.googleapis.com") && nextConfigContent.includes("https://fonts.gstatic.com"),
+  "next.config.mjs includes Google Fonts domains in style-src and font-src"
+);
+
+assert(
+  nextConfigContent.includes("frame-ancestors 'none'"),
+  "next.config.mjs includes frame-ancestors 'none'"
 );
 
 const invitePageContent = fs.readFileSync(path.join(rootDir, 'app', 'invite', 'page.tsx'), 'utf-8');

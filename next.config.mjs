@@ -22,15 +22,16 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://challenges.cloudflare.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' https://fonts.gstatic.com data:",
               "frame-src 'self' https://challenges.cloudflare.com",
-              "connect-src 'self' https://challenges.cloudflare.com https://*.supabase.co wss://*.supabase.co https://api.marketaux.com https://finnhub.io https://*.upstash.io",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' blob: data: https:",
-              "font-src 'self' data:",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com",
+              "img-src 'self' data: blob: https:",
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",
+              "frame-ancestors 'none'"
             ].join('; '),
           },
           {
