@@ -27,6 +27,16 @@ export default function RegisterPage() {
     }
   }, [user, isLoading, router]);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const refCode = params.get('ref');
+      if (refCode) {
+        sessionStorage.setItem('nexra_referral_code', refCode.trim());
+      }
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-slate-app antialiased relative flex flex-col justify-center">
       {/* Floating Theme Toggle in Top Right */}

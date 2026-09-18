@@ -10,10 +10,20 @@ import { useAuth } from '@/providers/AuthProvider';
 export default function InvitePage() {
   const { profile } = useAuth();
   const [copied, setCopied] = useState(false);
+  const [origin, setOrigin] = useState<string>('');
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setOrigin(window.location.origin);
+    }
+  }, []);
+
+  const fallbackOrigin = process.env.NEXT_PUBLIC_APP_URL || 'https://nexora-psi-beryl.vercel.app';
+  const baseOrigin = origin || (typeof window !== 'undefined' ? window.location.origin : '') || fallbackOrigin;
 
   const nickname = profile?.nickname || profile?.username || 'TRADER';
   const referralCode = profile?.referral_code || `NEXORA-${nickname.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6)}`;
-  const referralUrl = `https://nexora.sim/join?ref=${referralCode}`;
+  const referralUrl = `${baseOrigin}/join?ref=${referralCode}`;
 
   const friends = [
     { nickname: 'Marcus_S', status: 'Completed 3 Trades', reward: '+$1,000 Sim Cash', date: '2 days ago' },

@@ -310,6 +310,45 @@ assert(
 );
 
 // -----------------------------------------------------------------------------
+// TEST SUITE 6: CONTENT SECURITY POLICY (CSP) & REFERRAL LINK AUDIT
+// -----------------------------------------------------------------------------
+console.log('\n\x1b[33m[TEST GROUP 6] CSP Headers & Dynamic Referral Link Audit\x1b[0m');
+
+const middlewareContent = fs.readFileSync(path.join(rootDir, 'middleware.ts'), 'utf-8');
+assert(
+  middlewareContent.includes("'unsafe-eval'") && middlewareContent.includes('https://challenges.cloudflare.com'),
+  "middleware.ts includes 'unsafe-eval' and https://challenges.cloudflare.com in script-src"
+);
+
+assert(
+  middlewareContent.includes("frame-src 'self' https://challenges.cloudflare.com"),
+  "middleware.ts includes https://challenges.cloudflare.com in frame-src"
+);
+
+const nextConfigContent = fs.readFileSync(path.join(rootDir, 'next.config.mjs'), 'utf-8');
+assert(
+  nextConfigContent.includes("'unsafe-eval'") && nextConfigContent.includes('https://challenges.cloudflare.com'),
+  "next.config.mjs headers include 'unsafe-eval' and https://challenges.cloudflare.com"
+);
+
+const invitePageContent = fs.readFileSync(path.join(rootDir, 'app', 'invite', 'page.tsx'), 'utf-8');
+assert(
+  !invitePageContent.includes('https://nexora.sim'),
+  "app/invite/page.tsx does NOT contain hardcoded 'https://nexora.sim'"
+);
+
+assert(
+  invitePageContent.includes('window.location.origin') && invitePageContent.includes('https://nexora-psi-beryl.vercel.app'),
+  'app/invite/page.tsx uses dynamic window.location.origin with fallback to https://nexora-psi-beryl.vercel.app'
+);
+
+const joinPagePath = path.join(rootDir, 'app', 'join', 'page.tsx');
+assert(
+  fs.existsSync(joinPagePath),
+  'app/join/page.tsx exists and provides seamless redirect to /register'
+);
+
+// -----------------------------------------------------------------------------
 // FINAL SUMMARY
 // -----------------------------------------------------------------------------
 console.log('\n\x1b[36m==========================================================\x1b[0m');
