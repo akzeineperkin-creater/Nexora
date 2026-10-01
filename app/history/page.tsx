@@ -1,0 +1,498 @@
+'use client';
+
+import React, { useState, useMemo } from 'react';
+import Link from 'next/link';
+import {
+  History,
+  Download,
+  Search,
+  ArrowUpRight,
+  ArrowDownRight,
+  PlusCircle,
+  Clock,
+  TrendingUp,
+  Activity,
+  Layers,
+  CheckCircle2,
+  DollarSign,
+  Wallet,
+} from 'lucide-react';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { PillTabs } from '@/components/ui/Tabs';
+import { CompanyLogo } from '@/components/market/CompanyLogo';
+import { usePortfolio } from '@/hooks/usePortfolio';
+import { formatCurrency, formatPercent } from '@/lib/utils';
+import { useTranslation } from '@/providers/LanguageProvider';
+
+export default function TradeHistoryPage() {
+  const { t, locale } = useTranslation();
+  const { data: portfolio, isLoading } = usePortfolio();
+  const transactions: any[] = useMemo(() => portfolio?.transactions ?? [], [portfolio?.transactions]);
+
+  const [activeTab, setActiveTab] = useState<'all' | 'buy' | 'sell' | 'limit'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // 1. Calculate Aggregate Trade History Metrics
+  const totalTradesCount = transactions.length;
+  const buyTrades = transactions.filter((t) => t.type === 'BUY');
+  const sellTrades = transactions.filter((t) => t.type === 'SELL');
+
+  const totalVolume = transactions.reduce((sum, t) => sum + Number(t.total_amount || 0), 0);
+  const totalRealizedPnl = portfolio?.totalRealizedPnl ?? sellTrades.reduce((sum, t) => sum + (t.realized_pnl ? Number(t.realized_pnl) : 0), 0);
+  const profitableSells = sellTrades.filter((t) => Number(t.realized_pnl || 0) > 0);
+  const winRate = sellTrades.length > 0 ? ((profitableSells.length / sellTrades.length) * 100).toFixed(1) : '—';
+
+  // 2. Filter Transactions
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter((tx) => {
+      // Type Filter
+      if (activeTab === 'buy' && tx.type !== 'BUY') return false;
+      if (activeTab === 'sell' && tx.type !== 'SELL') return false;
+      if (activeTab === 'limit' && tx.order_type !== 'LIMIT') return false;
+
+      // Search Query Filter
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const ticker = (tx.asset?.ticker || tx.ticker || '').toLowerCase();
+        const name = (tx.asset?.name || tx.name || '').toLowerCase();
+        return ticker.includes(q) || name.includes(q);
+      }
+
+      return true;
+    });
+  }, [transactions, activeTab, searchQuery]);
+
+  // 3. Export CSV Handler
+  const handleExportCSV = () => {
+    const headers = [
+      'Order ID',
+      'Execution Timestamp (UTC)',
+      'Type',
+      'Ticker',
+      'Company Name',
+      'Shares',
+      'Execution Price',
+      'Current Price',
+      'Price Change %',
+      'Total Value',
+      'Cash Before',
+      'Cash After',
+      'Commission',
+      'Cost Basis',
+      'Realized PnL',
+      'Remaining Position',
+      'Order Type',
+      'Status',
+    ];
+
+    const rows = transactions.map((t) => [
+      t.id,
+      t.created_at,
+      t.type,
+      t.asset?.ticker || t.ticker || 'ASSET',
+      `"${t.asset?.name || t.name || ''}"`,
+      t.shares,
+      t.price_per_share,
+      t.current_price || t.price_per_share,
+      t.price_change_pct || 0,
+      t.total_amount,
+      t.cash_before !== null && t.cash_before !== undefined ? t.cash_before : '',
+      t.cash_after !== null && t.cash_after !== undefined ? t.cash_after : '',
+      t.commission || 0,
+      t.cost_basis || '',
+      t.realized_pnl || '',
+      t.remaining_position || '',
+      t.order_type || 'MARKET',
+      t.status || 'COMPLETED',
+    ]);
+
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `nexra_trade_history_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
+  // Format exact date & time string
+  const formatExactDateTime = (dateStr: string) => {
+    try {
+      const d = new Date(dateStr);
+      const loc = locale === 'kk' ? 'kk-KZ' : locale === 'ru' ? 'ru-RU' : 'en-US';
+      return d.toLocaleString(loc, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-6 max-w-[1440px] mx-auto">
+      {/* 1. HEADER SECTION */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-slate-dark dark:text-[#F5F5F5] tracking-tight">
+              {t('history.title')}
+            </h1>
+            <Badge variant="neutral" size="sm">
+              {t('history.ledgerActive')}
+            </Badge>
+          </div>
+          <p className="text-xs md:text-sm text-slate-muted dark:text-[#A1A1AA] mt-0.5">
+            {t('history.subtitle')}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportCSV}
+            disabled={transactions.length === 0}
+            className="font-bold"
+          >
+            <Download className="w-4 h-4 mr-1.5" />
+            <span>{t('history.exportCsvBtn')}</span>
+          </Button>
+
+          <Link href="/trade">
+            <Button variant="lime" size="sm" className="font-extrabold shadow-lime">
+              <PlusCircle className="w-4 h-4 mr-1.5" />
+              <span>{t('history.newOrder')}</span>
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* 2. STATS CARDS ROW */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="flex flex-col justify-between">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-muted dark:text-[#A1A1AA] uppercase tracking-wider">
+            <span>{t('history.totalTrades')}</span>
+            <div className="w-7 h-7 rounded-lg bg-slate-subtle dark:bg-[#1E1E21] flex items-center justify-center text-slate-600 dark:text-[#A1A1AA]">
+              <History className="w-3.5 h-3.5" />
+            </div>
+          </div>
+          <div className="my-2">
+            <div className="text-2xl font-extrabold font-mono text-slate-dark dark:text-[#F5F5F5] tracking-tight">
+              {totalTradesCount}
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-[11px] text-slate-muted dark:text-[#71717A] font-mono">
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+              {t('history.buysCount', { count: buyTrades.length })}
+            </span>
+            <span>•</span>
+            <span className="text-red-600 dark:text-red-400 font-bold">
+              {t('history.sellsCount', { count: sellTrades.length })}
+            </span>
+          </div>
+        </Card>
+
+        <Card className="flex flex-col justify-between">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-muted dark:text-[#A1A1AA] uppercase tracking-wider">
+            <span>{t('history.totalVolume')}</span>
+            <div className="w-7 h-7 rounded-lg bg-slate-subtle dark:bg-[#1E1E21] flex items-center justify-center text-slate-600 dark:text-[#A1A1AA]">
+              <DollarSign className="w-3.5 h-3.5" />
+            </div>
+          </div>
+          <div className="my-2">
+            <div className="text-2xl font-extrabold font-mono text-slate-dark dark:text-[#F5F5F5] tracking-tight">
+              {formatCurrency(totalVolume)}
+            </div>
+          </div>
+          <div className="text-[11px] text-slate-muted dark:text-[#71717A]">
+            {t('history.cumVolumeDesc')}
+          </div>
+        </Card>
+
+        <Card className="flex flex-col justify-between">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-muted dark:text-[#A1A1AA] uppercase tracking-wider">
+            <span>{t('history.realizedPnl')}</span>
+            <div className="w-7 h-7 rounded-lg bg-slate-subtle dark:bg-[#1E1E21] flex items-center justify-center text-slate-600 dark:text-[#A1A1AA]">
+              <TrendingUp className="w-3.5 h-3.5" />
+            </div>
+          </div>
+          <div className="my-2">
+            <div
+              className={`text-2xl font-extrabold font-mono tracking-tight ${
+                totalRealizedPnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
+              }`}
+            >
+              {totalRealizedPnl >= 0 ? '+' : ''}
+              {formatCurrency(totalRealizedPnl)}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant={totalRealizedPnl >= 0 ? 'up' : 'down'} size="sm">
+              {totalRealizedPnl >= 0 ? t('history.profitable') : t('history.loss')}
+            </Badge>
+            <span className="text-[11px] text-slate-muted dark:text-[#71717A] font-mono">
+              {t('history.fromSells', { count: sellTrades.length })}
+            </span>
+          </div>
+        </Card>
+
+        <Card className="flex flex-col justify-between">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-muted dark:text-[#A1A1AA] uppercase tracking-wider">
+            <span>{t('history.winRate')}</span>
+            <div className="w-7 h-7 rounded-lg bg-slate-subtle dark:bg-[#1E1E21] flex items-center justify-center text-slate-600 dark:text-[#A1A1AA]">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+            </div>
+          </div>
+          <div className="my-2">
+            <div className="text-2xl font-extrabold font-mono text-lime-900 dark:text-lime tracking-tight">
+              {winRate}%
+            </div>
+          </div>
+          <div className="text-[11px] text-slate-muted dark:text-[#71717A] font-mono">
+            {t('history.sellsInProfit', { count: profitableSells.length, total: sellTrades.length })}
+          </div>
+        </Card>
+      </div>
+
+      {/* 3. FILTER BAR */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#28282B] p-3 sm:p-3.5 rounded-2xl border border-slate-border dark:border-[#3A3A3D] shadow-subtle dark:shadow-dark-card">
+        <div className="overflow-x-auto no-scrollbar max-w-full pb-0.5">
+          <div className="flex items-center gap-2 shrink-0">
+            <PillTabs
+              tabs={[
+                { id: 'all', label: t('history.tabAll', { count: transactions.length }) },
+                { id: 'buy', label: t('history.tabBuy', { count: buyTrades.length }) },
+                { id: 'sell', label: t('history.tabSell', { count: sellTrades.length }) },
+                { id: 'limit', label: t('history.tabLimit', { count: '' }).replace('()', '').trim() },
+              ]}
+              activeId={activeTab}
+              onChange={(id) => setActiveTab(id as any)}
+            />
+          </div>
+        </div>
+
+        <div className="relative w-full sm:w-64">
+          <Search className="w-4 h-4 text-slate-400 dark:text-[#71717A] absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder={t('history.searchPlaceholder')}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-[#1E1E21] border border-slate-200 dark:border-[#3A3A3D] rounded-xl focus:outline-none focus:border-[#B8F500]/60 font-medium text-slate-dark dark:text-[#F5F5F5] placeholder:text-slate-400 dark:placeholder:text-[#71717A]"
+          />
+        </div>
+      </div>
+
+      {/* 4. TRADE HISTORY TABLE */}
+      <Card className="p-0 overflow-hidden shadow-sm dark:shadow-dark-card">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="bg-slate-50 dark:bg-[#1E1E21] border-b border-slate-border dark:border-[#3A3A3D] text-slate-muted dark:text-[#A1A1AA] uppercase text-[10px] font-bold tracking-wider select-none">
+                <th className="py-3 px-2 sm:px-4">{t('history.colAction')}</th>
+                <th className="py-3 px-2 sm:px-4">{t('history.colInstrument')}</th>
+                <th className="py-3 px-2 sm:px-4 text-right hidden sm:table-cell">{t('history.colShares')}</th>
+                <th className="py-3 px-2 sm:px-4 text-right hidden md:table-cell">{t('history.colPrice')}</th>
+                <th className="py-3 px-2 sm:px-4 text-right hidden lg:table-cell">{t('history.colCurrentPrice')}</th>
+                <th className="py-3 px-2 sm:px-4 text-right hidden md:table-cell">{t('history.colPriceChange')}</th>
+                <th className="py-3 px-2 sm:px-4 text-right">{t('history.colTotalValue')}</th>
+                <th className="py-3 px-2 sm:px-4 text-right hidden xl:table-cell">{t('history.colCashBefore')}</th>
+                <th className="py-3 px-2 sm:px-4 text-right hidden xl:table-cell">{t('history.colCashAfter')}</th>
+                <th className="py-3 px-2 sm:px-4 text-right">{t('history.colPnl')}</th>
+                <th className="py-3 px-2 sm:px-4 text-right hidden lg:table-cell">{t('history.colRemaining')}</th>
+                <th className="py-3 px-2 sm:px-4 hidden sm:table-cell">{t('history.colOrderType')}</th>
+                <th className="py-3 px-2 sm:px-4 hidden md:table-cell">{t('history.colTimestamp')}</th>
+                <th className="py-3 px-2 sm:px-4 text-center">{t('history.colStatus')}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-[#3A3A3D] font-mono">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={14} className="text-center py-12 text-slate-400 dark:text-[#71717A] font-bold font-sans">
+                    {t('history.loadingLedger')}
+                  </td>
+                </tr>
+              ) : filteredTransactions.length > 0 ? (
+                filteredTransactions.map((tx) => {
+                  const isBuy = tx.type === 'BUY';
+                  const ticker = tx.asset?.ticker || tx.ticker || 'ASSET';
+                  const name = tx.asset?.name || tx.name || ticker;
+
+                  const execPrice = Number(tx.price_per_share || 0);
+                  const currPrice = Number(tx.current_price || tx.asset?.current_price || execPrice);
+                  const sharesCount = Number(tx.shares || 1);
+
+                  // PRICE CHANGE SINCE PURCHASE:
+                  const priceChangePct = Number(
+                    tx.price_change_pct !== undefined && tx.price_change_pct !== null
+                      ? tx.price_change_pct
+                      : (execPrice > 0 ? (((currPrice - execPrice) / execPrice) * 100).toFixed(2) : 0)
+                  );
+                  const isChangePositive = priceChangePct >= 0;
+
+                  // P&L Logic:
+                  const isSell = tx.type === 'SELL';
+                  const pnlValue = isSell
+                    ? Number(tx.realized_pnl || 0)
+                    : Number(((currPrice - execPrice) * sharesCount).toFixed(2));
+                  const isPnlPositive = pnlValue >= 0;
+
+                  return (
+                    <tr key={tx.id} className="hover:bg-slate-50/80 dark:hover:bg-[#323236] transition-colors">
+                      {/* BUY / SELL Badge */}
+                      <td className="py-3 px-2 sm:px-4 font-sans">
+                        <span
+                          className={`inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2.5 py-1 rounded-md text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider ${
+                            isBuy
+                              ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50'
+                              : 'bg-red-50 dark:bg-red-950/40 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800/50'
+                          }`}
+                        >
+                          {isBuy ? (
+                            <ArrowDownRight className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                          ) : (
+                            <ArrowUpRight className="w-3 h-3 text-red-600 dark:text-red-400" />
+                          )}
+                          <span>{tx.type}</span>
+                        </span>
+                      </td>
+
+                      {/* Instrument & Logo */}
+                      <td className="py-3 px-2 sm:px-4 font-sans">
+                        <Link href={`/markets/${ticker}`} className="flex items-center gap-2 sm:gap-2.5 group">
+                          <CompanyLogo ticker={ticker} name={name} size="sm" />
+                          <div className="min-w-0">
+                            <div className="font-extrabold text-slate-dark dark:text-[#F5F5F5] text-xs group-hover:text-lime-900 dark:group-hover:text-lime transition-colors">
+                              {ticker}
+                            </div>
+                            <div className="text-[10px] text-slate-400 dark:text-[#71717A] truncate max-w-[80px] sm:max-w-[130px] font-medium">
+                              {name}
+                            </div>
+                          </div>
+                        </Link>
+                      </td>
+
+                      {/* Shares */}
+                      <td className="py-3 px-2 sm:px-4 text-right font-bold text-slate-dark dark:text-[#F5F5F5] text-xs hidden sm:table-cell">
+                        {tx.shares}
+                      </td>
+
+                      {/* Execution Price */}
+                      <td className="py-3 px-2 sm:px-4 text-right font-semibold text-slate-700 dark:text-[#A1A1AA] hidden md:table-cell">
+                        {formatCurrency(execPrice)}
+                      </td>
+
+                      {/* Current Price */}
+                      <td className="py-3 px-2 sm:px-4 text-right font-bold text-slate-dark dark:text-[#F5F5F5] hidden lg:table-cell">
+                        {formatCurrency(currPrice)}
+                      </td>
+
+                      {/* Price Change % Since Purchase */}
+                      <td className="py-3 px-2 sm:px-4 text-right font-sans hidden md:table-cell">
+                        <span
+                          className={`inline-flex items-center text-[10px] sm:text-[11px] font-extrabold font-mono px-1.5 sm:px-2 py-0.5 rounded-full ${
+                            isChangePositive
+                              ? 'text-emerald-800 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800/50'
+                              : 'text-red-800 dark:text-red-300 bg-red-100/70 dark:bg-red-950/40 border border-red-300 dark:border-red-800/50'
+                          }`}
+                        >
+                          {isChangePositive ? '+' : ''}{priceChangePct.toFixed(2)}%
+                        </span>
+                      </td>
+
+                      {/* Total Value */}
+                      <td className="py-3 px-2 sm:px-4 text-right font-black text-slate-dark dark:text-[#F5F5F5] text-xs sm:text-sm">
+                        {formatCurrency(Number(tx.total_amount || 0))}
+                      </td>
+
+                      {/* Cash Before */}
+                      <td className="py-3 px-2 sm:px-4 text-right font-mono text-slate-500 dark:text-[#71717A] text-[11px] hidden xl:table-cell">
+                        {tx.cash_before !== null && tx.cash_before !== undefined
+                          ? formatCurrency(Number(tx.cash_before))
+                          : '—'}
+                      </td>
+
+                      {/* Cash After */}
+                      <td className="py-3 px-2 sm:px-4 text-right font-mono font-semibold text-slate-700 dark:text-[#A1A1AA] text-[11px] hidden xl:table-cell">
+                        {tx.cash_after !== null && tx.cash_after !== undefined
+                          ? formatCurrency(Number(tx.cash_after))
+                          : '—'}
+                      </td>
+
+                      {/* Realized / Unrealized P&L */}
+                      <td className="py-3 px-2 sm:px-4 text-right font-mono font-bold">
+                        <span className={isPnlPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}>
+                          {isPnlPositive ? '+' : ''}{formatCurrency(pnlValue)}
+                        </span>
+                        <div className="text-[9px] text-slate-400 dark:text-[#71717A] font-sans font-normal">
+                          {isSell ? t('history.realized') : t('history.unrealized')}
+                        </div>
+                      </td>
+
+                      {/* Remaining Position */}
+                      <td className="py-3 px-2 sm:px-4 text-right font-mono text-slate-600 dark:text-[#A1A1AA] text-xs hidden lg:table-cell">
+                        {tx.remaining_position !== null && tx.remaining_position !== undefined
+                          ? `${tx.remaining_position} sh`
+                          : '—'}
+                      </td>
+
+                      {/* Order Type */}
+                      <td className="py-3 px-2 sm:px-4 font-sans text-slate-500 dark:text-[#A1A1AA] text-[11px] hidden sm:table-cell">
+                        <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-[#1E1E21] border border-slate-200 dark:border-[#3A3A3D] font-semibold">
+                          {tx.order_type || 'MARKET'}
+                        </span>
+                      </td>
+
+                      {/* Exact Timestamp */}
+                      <td className="py-3 px-2 sm:px-4 font-sans text-slate-400 dark:text-[#71717A] text-[10px] whitespace-nowrap hidden md:table-cell">
+                        {formatExactDateTime(tx.created_at)}
+                      </td>
+
+                      {/* Status */}
+                      <td className="py-3 px-2 sm:px-4 text-center font-sans">
+                        <Badge variant="lime" size="sm">
+                          {tx.status === 'COMPLETED' || tx.status === 'FILLED' ? t('history.statusFilled') : tx.status || t('history.statusFilled')}
+                        </Badge>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={14} className="text-center py-12 px-4 text-slate-muted dark:text-[#71717A] font-sans">
+                    <div className="flex flex-col items-center gap-2">
+                      <Layers className="w-8 h-8 text-slate-300 dark:text-[#3A3A3D]" />
+                      <span className="font-semibold text-xs text-slate-600 dark:text-[#A1A1AA]">
+                        {t('history.noMatchTitle')}
+                      </span>
+                      <span className="text-[11px] text-slate-400 dark:text-[#71717A]">
+                        {t('history.noMatchDesc')}
+                      </span>
+                      <Link href="/trade" className="mt-2">
+                        <Button variant="lime" size="xs">
+                          <PlusCircle className="w-3.5 h-3.5 mr-1" />
+                          <span>{t('history.openTerminal')}</span>
+                        </Button>
+                      </Link>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
+  );
+}
